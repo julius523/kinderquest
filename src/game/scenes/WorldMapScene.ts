@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { speak } from "../../services/textToSpeechService";
 import { createBigButton } from "../systems/uiFactory";
+import { chooseNextStep } from "../../services/adaptiveEngine";
 import { pickRandomActivity } from "../../data/activityLibrary";
 import type { SkillName } from "../../types/game";
 
@@ -275,13 +276,29 @@ export class WorldMapScene extends Phaser.Scene {
   private goToSelectedWorld(): void {
     const node = WORLD_NODES.find((candidate) => candidate.id === this.selectedNodeId);
     if (!node?.sceneKey || !node.skill) return;
+    void this.launchWorld(node.sceneKey, node.skill, node.label);
+  }
 
-    const activity = pickRandomActivity(node.skill);
-    if (!activity) {
-      speak(`${node.label} is coming soon!`);
+  private async launchWorld(sceneKey: string, skill: SkillName, label: string): Promise<void> {
+    const childProfileId = this.registry.get("childProfileId") as number | undefined;
+
+    if (!childProfileId) {
+      speak(`${label} is coming soon!`);
       return;
     }
 
-    this.scene.start(node.sceneKey, { activity });
+    const decision = await chooseNextStep(childProfileId, skill);
+
+    if (decision.type === "calm_break") {
+      this.scene.start("CalmPitStopScene", { returnScene: "WorldMapScene" });
+      return;
+    }
+
+    if (decision.type === "movement_break") {
+      this.scene.start("MovementMissionScene", { returnScene: "WorldMapScene" });
+      return;
+    }
+
+    this.scene.start(sceneKey, { activity: decision.activity });
   }
 }

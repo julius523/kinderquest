@@ -5,6 +5,8 @@ import { finishActivity } from "../../services/activityEngine";
 import { createBigButton } from "./uiFactory";
 import type { ActivityDefinition } from "../../types/activity";
 
+const RAPID_TAP_WINDOW_MS = 900;
+
 /**
  * Shared interaction for any "tap the right choice" activity (letters,
  * shapes, colors): renders N choice buttons, evaluates taps against
@@ -32,6 +34,9 @@ export function runChoiceActivity(
   let attempts = 0;
   let correctAttempts = 0;
   let promptLevelUsed = providePrompt(activity, 0).level;
+  let frustrationMarkers = 0;
+  let rapidTapBursts = 0;
+  let lastMissAt = 0;
 
   scene.add
     .text(width / 2, height * 0.12, activity.instruction, {
@@ -79,8 +84,15 @@ export function runChoiceActivity(
       return;
     }
 
+    const now = Date.now();
+    if (lastMissAt && now - lastMissAt < RAPID_TAP_WINDOW_MS) {
+      rapidTapBursts += 1;
+    }
+    lastMissAt = now;
+
     const prompt = providePrompt(activity, attempts);
     promptLevelUsed = prompt.level;
+    if (prompt.level === "caregiver") frustrationMarkers += 1;
     speak(prompt.spokenHint);
 
     if (prompt.level === "visual" || prompt.level === "model") {
@@ -100,6 +112,8 @@ export function runChoiceActivity(
       correctAttempts,
       promptLevelUsed,
       responseMode: "tap",
+      frustrationMarkers,
+      rapidTapBursts,
     });
 
     scene.scene.start("RewardRaceScene", { reward });
