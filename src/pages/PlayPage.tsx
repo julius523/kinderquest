@@ -1,7 +1,9 @@
+import { useNavigate } from "react-router-dom";
+import { PhaserGame } from "../game/PhaserGame";
+import { ROUTES } from "../app/constants";
+
 export default function PlayPage() {
-  return (
-    <main className="flex min-h-screen items-center justify-center bg-white">
-      <p className="text-xl text-slate-500">Loading Super Racer's garage…</p>
-    </main>
-  );
+  const navigate = useNavigate();
+
+  return <PhaserGame onExitToHome={() => navigate(ROUTES.childHome)} />;
 }
