@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { speak } from "../../services/textToSpeechService";
 import { createBigButton } from "../systems/uiFactory";
+import { prefersReducedMotion } from "../systems/motionPreference";
 import type { Reward } from "../../types/rewards";
 
 const CONFETTI_COLORS = [0xff5a36, 0xffd23f, 0x3bb2ff, 0x34d399, 0xa78bfa];
@@ -14,16 +15,19 @@ export class RewardRaceScene extends Phaser.Scene {
     const { width, height } = this.scale;
     this.cameras.main.setBackgroundColor("#fef9c3");
 
-    this.spawnConfetti();
+    const reduceMotion = prefersReducedMotion();
+    if (!reduceMotion) this.spawnConfetti();
 
     const trophy = this.add.image(width / 2, height * 0.32, "tex_trophy").setScale(2.4).setTint(0xf59e0b);
-    this.tweens.add({
-      targets: trophy,
-      angle: { from: -8, to: 8 },
-      yoyo: true,
-      repeat: -1,
-      duration: 500,
-    });
+    if (!reduceMotion) {
+      this.tweens.add({
+        targets: trophy,
+        angle: { from: -8, to: 8 },
+        yoyo: true,
+        repeat: -1,
+        duration: 500,
+      });
+    }
 
     this.add
       .text(width / 2, height * 0.52, data.reward.name, {

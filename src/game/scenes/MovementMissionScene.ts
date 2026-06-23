@@ -4,6 +4,7 @@ import { createBigButton } from "../systems/uiFactory";
 import { logBehaviorEvent } from "../../db/repositories/analyticsRepo";
 import { getSession, updateSession } from "../../db/repositories/sessionRepo";
 import { MOVEMENT_BREAKS, type MovementBreak } from "../../data/movementBreaks";
+import { prefersReducedMotion } from "../systems/motionPreference";
 
 export class MovementMissionScene extends Phaser.Scene {
   constructor() {
@@ -19,13 +20,15 @@ export class MovementMissionScene extends Phaser.Scene {
     speak(movement.spokenInstruction);
 
     const icon = this.add.image(width / 2, height * 0.35, "tex_star").setScale(3).setTint(0xeab308);
-    this.tweens.add({
-      targets: icon,
-      angle: { from: -15, to: 15 },
-      yoyo: true,
-      repeat: -1,
-      duration: 500,
-    });
+    if (!prefersReducedMotion()) {
+      this.tweens.add({
+        targets: icon,
+        angle: { from: -15, to: 15 },
+        yoyo: true,
+        repeat: -1,
+        duration: 500,
+      });
+    }
 
     this.add
       .text(width / 2, height * 0.55, movement.label, {

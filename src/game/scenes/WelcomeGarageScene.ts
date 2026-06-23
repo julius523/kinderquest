@@ -4,6 +4,7 @@ import { createBigButton } from "../systems/uiFactory";
 import { getDefaultProfile } from "../../db/repositories/profileRepo";
 import { startSession } from "../../db/repositories/sessionRepo";
 import { detectDeviceType } from "../../utils/device";
+import { prefersReducedMotion } from "../systems/motionPreference";
 
 export class WelcomeGarageScene extends Phaser.Scene {
   constructor() {
@@ -47,14 +48,16 @@ export class WelcomeGarageScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
-    this.tweens.add({
-      targets: [superRacer, captainTurbo],
-      y: "+=10",
-      duration: 1200,
-      yoyo: true,
-      repeat: -1,
-      ease: "Sine.easeInOut",
-    });
+    if (!prefersReducedMotion()) {
+      this.tweens.add({
+        targets: [superRacer, captainTurbo],
+        y: "+=10",
+        duration: 1200,
+        yoyo: true,
+        repeat: -1,
+        ease: "Sine.easeInOut",
+      });
+    }
 
     this.add
       .text(width / 2, height * 0.7, "You are Super Racer!", {
