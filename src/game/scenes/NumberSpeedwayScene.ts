@@ -6,7 +6,7 @@ import { createBigButton } from "../systems/uiFactory";
 import type { ActivityDefinition } from "../../types/activity";
 
 const OBJECT_TEXTURES: Record<string, string> = {
-  race_car: "tex_car",
+  race_car: "tex_car_plain",
   boat: "tex_boat",
   wheel: "tex_wheel",
   trophy: "tex_trophy",
@@ -30,7 +30,7 @@ export class NumberSpeedwayScene extends Phaser.Scene {
 
     const { width, height } = this.scale;
     const targetCount = this.activity.targetCount ?? 3;
-    const textureKey = OBJECT_TEXTURES[this.activity.objectType ?? "race_car"] ?? "tex_car";
+    const textureKey = OBJECT_TEXTURES[this.activity.objectType ?? "race_car"] ?? "tex_car_plain";
 
     this.add
       .text(width / 2, height * 0.1, this.activity.instruction, {

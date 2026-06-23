@@ -29,7 +29,7 @@ export class MonsterRacerChallengeScene extends Phaser.Scene {
 
     speak("Monster Racer mixed up the track. Can you help?");
 
-    const monster = this.add.image(width * 0.85, height * 0.85, "tex_car").setScale(1.6).setTint(0x854d0e);
+    const monster = this.add.image(width * 0.85, height * 0.85, "tex_car_black").setScale(2.1);
     if (!prefersReducedMotion()) {
       this.tweens.add({ targets: monster, angle: { from: -6, to: 6 }, yoyo: true, repeat: -1, duration: 400 });
     }

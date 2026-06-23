@@ -26,8 +26,7 @@ export class WelcomeGarageScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
-    const superRacer = this.add.image(width * 0.35, height * 0.46, "tex_car").setScale(1.2);
-    superRacer.setTint(0xff5a36);
+    const superRacer = this.add.image(width * 0.35, height * 0.46, "tex_car_red").setScale(1.3);
     this.add
       .text(width * 0.35, height * 0.46 + 78, "Super Racer", {
         fontFamily: "system-ui, sans-serif",
@@ -37,8 +36,7 @@ export class WelcomeGarageScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
-    const captainTurbo = this.add.image(width * 0.65, height * 0.46, "tex_car").setScale(1.0);
-    captainTurbo.setTint(0x2563eb);
+    const captainTurbo = this.add.image(width * 0.65, height * 0.46, "tex_car_blue").setScale(1.1);
     this.add
       .text(width * 0.65, height * 0.46 + 78, "Captain Turbo", {
         fontFamily: "system-ui, sans-serif",

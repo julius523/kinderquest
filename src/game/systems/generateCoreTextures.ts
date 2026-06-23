@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 
-const INK = 0x1a1a2e;
+export const INK = 0x1a1a2e;
 const SHINE = 0xe2e8f0;
 
 function drawStar(
@@ -25,7 +25,7 @@ function drawStar(
   graphics.fillPath();
 }
 
-function drawFace(
+export function drawFace(
   graphics: Phaser.GameObjects.Graphics,
   leftEyeX: number,
   rightEyeX: number,
@@ -57,27 +57,7 @@ function drawFace(
  * any color car or boat.
  */
 export function generateCoreTextures(scene: Phaser.Scene): void {
-  if (scene.textures.exists("tex_car")) return;
-
-  // --- Talking race car, with a friendly cartoon face on the windshield ---
-  const car = scene.add.graphics();
-  car.fillStyle(0xffffff, 1);
-  car.fillRoundedRect(6, 56, 148, 46, 23); // lower body
-  car.fillRoundedRect(40, 14, 90, 50, 24); // cabin/roof bubble
-  car.fillStyle(SHINE, 0.7);
-  car.fillRoundedRect(54, 24, 70, 30, 14); // windshield band
-  drawFace(car, 72, 104, 40, 8, 58, 36);
-  car.fillStyle(INK, 1);
-  car.fillCircle(38, 96, 17);
-  car.fillCircle(124, 96, 17);
-  car.fillStyle(SHINE, 1);
-  car.fillCircle(38, 96, 7);
-  car.fillCircle(124, 96, 7);
-  car.fillStyle(0xffd23f, 1);
-  car.fillCircle(38, 96, 2.5);
-  car.fillCircle(124, 96, 2.5);
-  car.generateTexture("tex_car", 160, 112);
-  car.destroy();
+  if (scene.textures.exists("tex_boat")) return;
 
   // --- Talking boat friend, curved hull via uneven corner radii ---
   const boat = scene.add.graphics();
@@ -94,6 +74,19 @@ export function generateCoreTextures(scene: Phaser.Scene): void {
   drawFace(boat, 36, 58, 70, 7, 84, 30);
   boat.generateTexture("tex_boat", 140, 96);
   boat.destroy();
+
+  // A plain, faceless, tintable silhouette — used where color conveys
+  // *state* (tapped/correct) rather than character identity, since the
+  // real Kenney car sprites are pre-colored and don't tint cleanly.
+  const carPlain = scene.add.graphics();
+  carPlain.fillStyle(0xffffff, 1);
+  carPlain.fillRoundedRect(6, 56, 148, 46, 23);
+  carPlain.fillRoundedRect(40, 14, 90, 50, 24);
+  carPlain.fillStyle(INK, 1);
+  carPlain.fillCircle(38, 96, 17);
+  carPlain.fillCircle(124, 96, 17);
+  carPlain.generateTexture("tex_car_plain", 160, 112);
+  carPlain.destroy();
 
   const wheel = scene.add.graphics();
   wheel.fillStyle(0xffffff, 1);

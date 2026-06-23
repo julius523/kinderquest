@@ -6,7 +6,7 @@ import { createBigButton } from "../systems/uiFactory";
 import type { ActivityDefinition } from "../../types/activity";
 
 const OBJECT_TEXTURES: Record<string, string> = {
-  car: "tex_car",
+  car: "tex_car_plain",
   boat: "tex_boat",
 };
 
@@ -45,7 +45,7 @@ export class ListeningLaneScene extends Phaser.Scene {
     const spacing = width / (objects.length + 1);
 
     objects.forEach((objectId, index) => {
-      const textureKey = OBJECT_TEXTURES[objectId] ?? "tex_car";
+      const textureKey = OBJECT_TEXTURES[objectId] ?? "tex_car_plain";
       const image = this.add
         .image(spacing * (index + 1), height * 0.5, textureKey)
         .setScale(1.8)

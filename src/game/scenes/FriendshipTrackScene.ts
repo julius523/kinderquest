@@ -43,7 +43,7 @@ export class FriendshipTrackScene extends Phaser.Scene {
 
     speak(`${this.partner.displayName}'s turn.`);
 
-    const car = this.add.image(width / 2, height * 0.5, "tex_car").setScale(1.4).setTint(0xdb2777);
+    const car = this.add.image(width / 2, height * 0.5, "tex_car_green").setScale(1.7);
     this.tweens.add({
       targets: car,
       x: width * 0.7,
@@ -78,7 +78,7 @@ export class FriendshipTrackScene extends Phaser.Scene {
 
     speak("Now your turn. Say, my turn!");
 
-    const car = this.add.image(width / 2, height * 0.5, "tex_car").setScale(1.4).setTint(0xff5a36);
+    const car = this.add.image(width / 2, height * 0.5, "tex_car_red").setScale(1.7);
 
     createBigButton(
       this,
