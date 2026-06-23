@@ -3,6 +3,13 @@ import { BootScene } from "./scenes/BootScene";
 import { PreloadScene } from "./scenes/PreloadScene";
 import { WelcomeGarageScene } from "./scenes/WelcomeGarageScene";
 import { WorldMapScene } from "./scenes/WorldMapScene";
+import { LetterLagoonScene } from "./scenes/LetterLagoonScene";
+import { NumberSpeedwayScene } from "./scenes/NumberSpeedwayScene";
+import { ShapeHarborScene } from "./scenes/ShapeHarborScene";
+import { ColorCityScene } from "./scenes/ColorCityScene";
+import { ListeningLaneScene } from "./scenes/ListeningLaneScene";
+import { DrawingDockScene } from "./scenes/DrawingDockScene";
+import { RewardRaceScene } from "./scenes/RewardRaceScene";
 
 export function createGameConfig(parent: HTMLElement): Phaser.Types.Core.GameConfig {
   return {
@@ -15,6 +22,18 @@ export function createGameConfig(parent: HTMLElement): Phaser.Types.Core.GameCon
       width: parent.clientWidth || window.innerWidth,
       height: parent.clientHeight || window.innerHeight,
     },
-    scene: [BootScene, PreloadScene, WelcomeGarageScene, WorldMapScene],
+    scene: [
+      BootScene,
+      PreloadScene,
+      WelcomeGarageScene,
+      WorldMapScene,
+      LetterLagoonScene,
+      NumberSpeedwayScene,
+      ShapeHarborScene,
+      ColorCityScene,
+      ListeningLaneScene,
+      DrawingDockScene,
+      RewardRaceScene,
+    ],
   };
 }

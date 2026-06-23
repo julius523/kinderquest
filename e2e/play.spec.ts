@@ -11,14 +11,16 @@ test("play page boots the Phaser game and shows the world map after Start Missio
 
   await page.goto("/play");
 
-  // The Phaser canvas should mount.
-  await expect(page.locator("canvas")).toBeVisible({ timeout: 10_000 });
+  // The Phaser canvas should mount. React StrictMode double-invokes the
+  // mount effect in dev, briefly creating a second canvas before the first
+  // is destroyed — harmless, but means we must target .first() here.
+  const canvas = page.locator("canvas").first();
+  await expect(canvas).toBeVisible({ timeout: 10_000 });
 
   // Give Boot -> Preload -> WelcomeGarage a moment to run, then tap
   // "Start Mission" by clicking where the button renders (canvas content
   // isn't queryable by text, so we click by approximate position).
   await page.waitForTimeout(500);
-  const canvas = page.locator("canvas");
   const box = await canvas.boundingBox();
   expect(box).not.toBeNull();
 

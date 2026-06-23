@@ -394,3 +394,11 @@ export function getActivitiesBySkill(skill: ActivityDefinition["skill"]): Activi
 export function getActivitiesByType(type: ActivityDefinition["type"]): ActivityDefinition[] {
   return ACTIVITY_LIBRARY.filter((activity) => activity.type === type);
 }
+
+/** Picks a random activity for a skill. A placeholder for the adaptive
+ * engine's personalized selection, which lands in a later phase. */
+export function pickRandomActivity(skill: ActivityDefinition["skill"]): ActivityDefinition | undefined {
+  const candidates = getActivitiesBySkill(skill);
+  if (candidates.length === 0) return undefined;
+  return candidates[Math.floor(Math.random() * candidates.length)];
+}

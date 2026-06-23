@@ -1,6 +1,8 @@
 import Phaser from "phaser";
 import { speak } from "../../services/textToSpeechService";
 import { createBigButton } from "../systems/uiFactory";
+import { pickRandomActivity } from "../../data/activityLibrary";
+import type { SkillName } from "../../types/game";
 
 type WorldNode = {
   id: string;
@@ -8,21 +10,74 @@ type WorldNode = {
   x: number;
   y: number;
   unlocked: boolean;
+  sceneKey?: string;
+  skill?: SkillName;
 };
 
 const WORLD_NODES: WorldNode[] = [
-  { id: "welcome_garage", label: "Garage", x: 0.08, y: 0.55, unlocked: true },
-  { id: "letter_lagoon", label: "Letter Lagoon", x: 0.24, y: 0.32, unlocked: true },
-  { id: "number_speedway", label: "Number Speedway", x: 0.4, y: 0.62, unlocked: false },
-  { id: "shape_harbor", label: "Shape Harbor", x: 0.56, y: 0.32, unlocked: false },
-  { id: "color_city", label: "Color City", x: 0.72, y: 0.62, unlocked: false },
-  { id: "trophy_celebration", label: "Trophy", x: 0.9, y: 0.4, unlocked: false },
+  { id: "welcome_garage", label: "Garage", x: 0.06, y: 0.55, unlocked: true },
+  {
+    id: "letter_lagoon",
+    label: "Letter Lagoon",
+    x: 0.2,
+    y: 0.3,
+    unlocked: true,
+    sceneKey: "LetterLagoonScene",
+    skill: "letters",
+  },
+  {
+    id: "number_speedway",
+    label: "Number Speedway",
+    x: 0.34,
+    y: 0.6,
+    unlocked: true,
+    sceneKey: "NumberSpeedwayScene",
+    skill: "counting",
+  },
+  {
+    id: "shape_harbor",
+    label: "Shape Harbor",
+    x: 0.48,
+    y: 0.3,
+    unlocked: true,
+    sceneKey: "ShapeHarborScene",
+    skill: "shapes",
+  },
+  {
+    id: "color_city",
+    label: "Color City",
+    x: 0.62,
+    y: 0.6,
+    unlocked: true,
+    sceneKey: "ColorCityScene",
+    skill: "colors",
+  },
+  {
+    id: "listening_lane",
+    label: "Listening Lane",
+    x: 0.76,
+    y: 0.3,
+    unlocked: true,
+    sceneKey: "ListeningLaneScene",
+    skill: "listening",
+  },
+  {
+    id: "drawing_dock",
+    label: "Drawing Dock",
+    x: 0.9,
+    y: 0.6,
+    unlocked: true,
+    sceneKey: "DrawingDockScene",
+    skill: "prewriting",
+  },
 ];
 
-/** The Kinder Quest Road: a big path map showing the current mission,
- * locked future worlds, and trophy progress. Activity-scene wiring for
- * each world lands in Phase 6. */
+/** The Kinder Quest Road: a big path map showing every mission, locked
+ * future worlds, and trophy progress. Selecting a node + pressing Go
+ * launches that world's scene with a freshly picked activity. */
 export class WorldMapScene extends Phaser.Scene {
+  private selectedNodeId = "letter_lagoon";
+
   constructor() {
     super("WorldMapScene");
   }
@@ -34,7 +89,7 @@ export class WorldMapScene extends Phaser.Scene {
     this.add
       .text(width / 2, height * 0.08, "Kinder Quest Road", {
         fontFamily: "system-ui, sans-serif",
-        fontSize: "34px",
+        fontSize: "32px",
         fontStyle: "bold",
         color: "#0369a1",
       })
@@ -47,41 +102,61 @@ export class WorldMapScene extends Phaser.Scene {
     path.lineStyle(6, 0xbae6fd, 1);
     path.beginPath();
     path.moveTo(points[0].x, points[0].y);
-    for (const point of points.slice(1)) {
-      path.lineTo(point.x, point.y);
-    }
+    for (const point of points.slice(1)) path.lineTo(point.x, point.y);
     path.strokePath();
 
-    const currentWorldId = "letter_lagoon";
+    const circles: Phaser.GameObjects.Arc[] = [];
+
+    const refreshHighlights = () => {
+      WORLD_NODES.forEach((node, index) => {
+        const circle = circles[index];
+        const isSelected = node.id === this.selectedNodeId;
+        circle.setStrokeStyle(4, isSelected ? 0xff5a36 : node.unlocked ? 0x0ea5e9 : 0x94a3b8);
+        circle.setScale(isSelected ? 1.15 : 1);
+      });
+    };
 
     WORLD_NODES.forEach((node, index) => {
       const { x, y } = points[index];
-      const isCurrent = node.id === currentWorldId;
-
-      const circle = this.add.circle(x, y, isCurrent ? 38 : 30, node.unlocked ? 0xffffff : 0xcbd5e1);
-      circle.setStrokeStyle(4, isCurrent ? 0xff5a36 : node.unlocked ? 0x0ea5e9 : 0x94a3b8);
-
-      if (isCurrent) {
-        this.tweens.add({ targets: circle, scale: 1.15, duration: 650, yoyo: true, repeat: -1 });
-      }
+      const circle = this.add.circle(x, y, 32, node.unlocked ? 0xffffff : 0xcbd5e1);
+      circles.push(circle);
 
       this.add
-        .text(x, y + (isCurrent ? 56 : 46), node.label, {
+        .text(x, y + 48, node.label, {
           fontFamily: "system-ui, sans-serif",
-          fontSize: "15px",
+          fontSize: "14px",
           fontStyle: node.unlocked ? "bold" : "normal",
           color: node.unlocked ? "#334155" : "#94a3b8",
         })
         .setOrigin(0.5);
 
-      if (node.unlocked) {
+      if (node.unlocked && node.sceneKey) {
         circle.setInteractive({ useHandCursor: true });
-        circle.on("pointerdown", () => speak(node.label));
+        circle.on("pointerdown", () => {
+          speak(node.label);
+          this.selectedNodeId = node.id;
+          refreshHighlights();
+        });
       }
     });
 
+    refreshHighlights();
+
     createBigButton(this, width / 2, height * 0.88, "Go", () => {
-      speak("Letter Lagoon is coming soon!");
+      this.goToSelectedWorld();
     });
+  }
+
+  private goToSelectedWorld(): void {
+    const node = WORLD_NODES.find((candidate) => candidate.id === this.selectedNodeId);
+    if (!node?.sceneKey || !node.skill) return;
+
+    const activity = pickRandomActivity(node.skill);
+    if (!activity) {
+      speak(`${node.label} is coming soon!`);
+      return;
+    }
+
+    this.scene.start(node.sceneKey, { activity });
   }
 }
