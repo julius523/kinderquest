@@ -12,24 +12,23 @@ export class WelcomeGarageScene extends Phaser.Scene {
 
   create(): void {
     const { width, height } = this.scale;
-    this.cameras.main.setBackgroundColor("#fff7ed");
-
-    this.add.image(width * 0.15, height * 0.2, "tex_cloud").setTint(0xffe4d1).setScale(1.4);
-    this.add.image(width * 0.85, height * 0.15, "tex_cloud").setTint(0xffe4d1).setScale(1.1);
+    this.drawScenery(width, height);
 
     this.add
-      .text(width / 2, height * 0.12, "Kinder Quest", {
+      .text(width / 2, height * 0.1, "Kinder Quest", {
         fontFamily: "system-ui, sans-serif",
-        fontSize: "44px",
+        fontSize: "46px",
         fontStyle: "bold",
         color: "#ff5a36",
+        stroke: "#ffffff",
+        strokeThickness: 6,
       })
       .setOrigin(0.5);
 
-    const superRacer = this.add.image(width * 0.35, height * 0.45, "tex_car").setScale(1.5);
+    const superRacer = this.add.image(width * 0.35, height * 0.46, "tex_car").setScale(1.2);
     superRacer.setTint(0xff5a36);
     this.add
-      .text(width * 0.35, height * 0.45 + 70, "Super Racer", {
+      .text(width * 0.35, height * 0.46 + 78, "Super Racer", {
         fontFamily: "system-ui, sans-serif",
         fontSize: "18px",
         fontStyle: "bold",
@@ -37,10 +36,10 @@ export class WelcomeGarageScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
-    const captainTurbo = this.add.image(width * 0.65, height * 0.45, "tex_car").setScale(1.2);
-    captainTurbo.setTint(0xd32f2f);
+    const captainTurbo = this.add.image(width * 0.65, height * 0.46, "tex_car").setScale(1.0);
+    captainTurbo.setTint(0x2563eb);
     this.add
-      .text(width * 0.65, height * 0.45 + 70, "Captain Turbo", {
+      .text(width * 0.65, height * 0.46 + 78, "Captain Turbo", {
         fontFamily: "system-ui, sans-serif",
         fontSize: "18px",
         fontStyle: "bold",
@@ -58,29 +57,51 @@ export class WelcomeGarageScene extends Phaser.Scene {
     });
 
     this.add
-      .text(width / 2, height * 0.65, "You are Super Racer!", {
+      .text(width / 2, height * 0.7, "You are Super Racer!", {
         fontFamily: "system-ui, sans-serif",
         fontSize: "22px",
-        color: "#334155",
+        fontStyle: "bold",
+        color: "#ffffff",
+        stroke: "#7c2d12",
+        strokeThickness: 4,
       })
       .setOrigin(0.5);
 
     speak("Welcome to Kinder Quest. You are Super Racer!");
 
-    createBigButton(this, width / 2, height * 0.8, "Start Mission", () => {
+    createBigButton(this, width / 2, height * 0.83, "Start Mission", () => {
       void this.startMission();
     });
 
     createBigButton(
       this,
       width / 2,
-      height * 0.91,
+      height * 0.94,
       "Two Player",
       () => {
         void this.startMission("two_player");
       },
-      { color: 0x3bb2ff, width: 220, height: 64, fontSize: "22px" },
+      { color: 0x3bb2ff, width: 220, height: 60, fontSize: "20px" },
     );
+  }
+
+  private drawScenery(width: number, height: number): void {
+    const horizonY = height * 0.82;
+
+    const sky = this.add.graphics();
+    sky.fillGradientStyle(0xffd9b8, 0xffd9b8, 0xfff7ed, 0xfff7ed, 1);
+    sky.fillRect(0, 0, width, horizonY);
+
+    const ground = this.add.graphics();
+    ground.fillStyle(0x86efac, 1);
+    ground.fillRect(0, horizonY, width, height - horizonY);
+
+    this.add.image(width * 0.1, height * 0.14, "tex_sun").setScale(1.1);
+    this.add.image(width * 0.85, height * 0.1, "tex_cloud").setTint(0xffe4d1).setScale(1.2);
+
+    [0.06, 0.94].forEach((fx) => {
+      this.add.image(width * fx, horizonY + 16, "tex_bush").setScale(1).setTint(0x4ade80);
+    });
   }
 
   private async startMission(mode: "solo" | "two_player" = "solo"): Promise<void> {
@@ -91,6 +112,11 @@ export class WelcomeGarageScene extends Phaser.Scene {
     this.registry.set("childProfileId", profile.id);
     this.registry.set("sessionId", session.id);
     this.registry.set("sessionMode", mode);
+
+    if (mode === "two_player") {
+      this.scene.start("FriendshipTrackScene");
+      return;
+    }
 
     this.scene.start("WorldMapScene");
   }

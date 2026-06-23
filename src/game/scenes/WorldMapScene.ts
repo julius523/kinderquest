@@ -15,12 +15,12 @@ type WorldNode = {
 };
 
 const WORLD_NODES: WorldNode[] = [
-  { id: "welcome_garage", label: "Garage", x: 0.06, y: 0.55, unlocked: true },
+  { id: "welcome_garage", label: "Garage", x: 0.06, y: 0.6, unlocked: true },
   {
     id: "letter_lagoon",
     label: "Letter Lagoon",
     x: 0.2,
-    y: 0.3,
+    y: 0.38,
     unlocked: true,
     sceneKey: "LetterLagoonScene",
     skill: "letters",
@@ -38,7 +38,7 @@ const WORLD_NODES: WorldNode[] = [
     id: "shape_harbor",
     label: "Shape Harbor",
     x: 0.48,
-    y: 0.3,
+    y: 0.38,
     unlocked: true,
     sceneKey: "ShapeHarborScene",
     skill: "shapes",
@@ -56,7 +56,7 @@ const WORLD_NODES: WorldNode[] = [
     id: "listening_lane",
     label: "Listening Lane",
     x: 0.76,
-    y: 0.3,
+    y: 0.38,
     unlocked: true,
     sceneKey: "ListeningLaneScene",
     skill: "listening",
@@ -72,9 +72,61 @@ const WORLD_NODES: WorldNode[] = [
   },
 ];
 
-/** The Kinder Quest Road: a big path map showing every mission, locked
- * future worlds, and trophy progress. Selecting a node + pressing Go
- * launches that world's scene with a freshly picked activity. */
+type SupportMission = {
+  id: string;
+  label: string;
+  icon: string;
+  color: number;
+  launch: (scene: Phaser.Scene) => void;
+};
+
+const SUPPORT_MISSIONS: SupportMission[] = [
+  {
+    id: "speech_garage",
+    label: "Speech Garage",
+    icon: "message-circle",
+    color: 0xe11d48,
+    launch: (scene) => {
+      const activity = pickRandomActivity("communication");
+      if (activity) scene.scene.start("SpeechGarageScene", { activity });
+    },
+  },
+  {
+    id: "story_cove",
+    label: "Story Cove",
+    icon: "book-open",
+    color: 0x0284c7,
+    launch: (scene) => scene.scene.start("StoryCoveScene", {}),
+  },
+  {
+    id: "calm_pit_stop",
+    label: "Calm Pit Stop",
+    icon: "wind",
+    color: 0x6366f1,
+    launch: (scene) => scene.scene.start("CalmPitStopScene", {}),
+  },
+  {
+    id: "movement_break",
+    label: "Movement Break",
+    icon: "activity",
+    color: 0xeab308,
+    launch: (scene) => scene.scene.start("MovementMissionScene", {}),
+  },
+  {
+    id: "monster_racer",
+    label: "Monster Racer",
+    icon: "car",
+    color: 0xb45309,
+    launch: (scene) => scene.scene.start("MonsterRacerChallengeScene"),
+  },
+];
+
+/** The Kinder Quest Road: a real-looking road (asphalt + dashed center
+ * line) winding through a sunny outdoor scene, showing every mission and
+ * locked future worlds. Selecting a node + pressing Go launches that
+ * world's scene with a freshly picked activity. A second row of support
+ * missions (speech, story, calm, movement, Monster Racer) is always
+ * available — these aren't gated behind path progress. */
 export class WorldMapScene extends Phaser.Scene {
   private selectedNodeId = "letter_lagoon";
 
@@ -84,26 +136,24 @@ export class WorldMapScene extends Phaser.Scene {
 
   create(): void {
     const { width, height } = this.scale;
-    this.cameras.main.setBackgroundColor("#e0f2fe");
+
+    this.drawScenery(width, height);
 
     this.add
-      .text(width / 2, height * 0.08, "Kinder Quest Road", {
+      .text(width / 2, height * 0.06, "Kinder Quest Road", {
         fontFamily: "system-ui, sans-serif",
-        fontSize: "32px",
+        fontSize: "30px",
         fontStyle: "bold",
-        color: "#0369a1",
+        color: "#ffffff",
+        stroke: "#0369a1",
+        strokeThickness: 6,
       })
       .setOrigin(0.5);
 
     speak("Here is the road. Pick a mission!");
 
     const points = WORLD_NODES.map((node) => ({ x: width * node.x, y: height * node.y }));
-    const path = this.add.graphics();
-    path.lineStyle(6, 0xbae6fd, 1);
-    path.beginPath();
-    path.moveTo(points[0].x, points[0].y);
-    for (const point of points.slice(1)) path.lineTo(point.x, point.y);
-    path.strokePath();
+    this.drawRoad(points);
 
     const circles: Phaser.GameObjects.Arc[] = [];
 
@@ -111,22 +161,24 @@ export class WorldMapScene extends Phaser.Scene {
       WORLD_NODES.forEach((node, index) => {
         const circle = circles[index];
         const isSelected = node.id === this.selectedNodeId;
-        circle.setStrokeStyle(4, isSelected ? 0xff5a36 : node.unlocked ? 0x0ea5e9 : 0x94a3b8);
+        circle.setStrokeStyle(5, isSelected ? 0xff5a36 : node.unlocked ? 0x0ea5e9 : 0x94a3b8);
         circle.setScale(isSelected ? 1.15 : 1);
       });
     };
 
     WORLD_NODES.forEach((node, index) => {
       const { x, y } = points[index];
-      const circle = this.add.circle(x, y, 32, node.unlocked ? 0xffffff : 0xcbd5e1);
+      const circle = this.add.circle(x, y, 30, node.unlocked ? 0xffffff : 0xcbd5e1);
       circles.push(circle);
 
       this.add
-        .text(x, y + 48, node.label, {
+        .text(x, y + 44, node.label, {
           fontFamily: "system-ui, sans-serif",
-          fontSize: "14px",
-          fontStyle: node.unlocked ? "bold" : "normal",
-          color: node.unlocked ? "#334155" : "#94a3b8",
+          fontSize: "13px",
+          fontStyle: "bold",
+          color: "#ffffff",
+          stroke: node.unlocked ? "#0369a1" : "#64748b",
+          strokeThickness: 4,
         })
         .setOrigin(0.5);
 
@@ -142,9 +194,82 @@ export class WorldMapScene extends Phaser.Scene {
 
     refreshHighlights();
 
-    createBigButton(this, width / 2, height * 0.88, "Go", () => {
+    createBigButton(this, width / 2, height * 0.82, "Go", () => {
       this.goToSelectedWorld();
     });
+
+    this.drawSupportRow(width, height);
+  }
+
+  private drawSupportRow(width: number, height: number): void {
+    const spacing = width / (SUPPORT_MISSIONS.length + 1);
+    const y = height * 0.93;
+
+    SUPPORT_MISSIONS.forEach((mission, index) => {
+      createBigButton(
+        this,
+        spacing * (index + 1),
+        y,
+        mission.label,
+        () => mission.launch(this),
+        { width: spacing - 10, height: 56, color: mission.color, fontSize: "12px" },
+      );
+    });
+  }
+
+  private drawScenery(width: number, height: number): void {
+    const horizonY = height * 0.7;
+
+    const sky = this.add.graphics();
+    sky.fillGradientStyle(0x7dd3fc, 0x7dd3fc, 0xe0f2fe, 0xe0f2fe, 1);
+    sky.fillRect(0, 0, width, horizonY);
+
+    const grass = this.add.graphics();
+    grass.fillStyle(0x86efac, 1);
+    grass.fillRect(0, horizonY, width, height - horizonY);
+
+    this.add.image(width * 0.88, height * 0.1, "tex_sun").setScale(1.1);
+    this.add.image(width * 0.12, height * 0.08, "tex_cloud").setScale(0.9).setAlpha(0.9);
+    this.add.image(width * 0.78, height * 0.16, "tex_cloud").setScale(0.7).setAlpha(0.85);
+
+    const bushPositions = [0.04, 0.96];
+    bushPositions.forEach((fx) => {
+      this.add.image(width * fx, horizonY + 8, "tex_bush").setScale(0.7).setTint(0x4ade80);
+    });
+  }
+
+  private drawRoad(points: { x: number; y: number }[]): void {
+    const road = this.add.graphics();
+    road.lineStyle(40, 0x475569, 1);
+    road.beginPath();
+    road.moveTo(points[0].x, points[0].y);
+    for (const point of points.slice(1)) road.lineTo(point.x, point.y);
+    road.strokePath();
+
+    // Re-stroke each joint as a thick circle so corners look paved, not pointy.
+    for (const point of points) {
+      road.fillStyle(0x475569, 1);
+      road.fillCircle(point.x, point.y, 20);
+    }
+
+    for (let i = 0; i < points.length - 1; i++) {
+      const a = points[i];
+      const b = points[i + 1];
+      const dx = b.x - a.x;
+      const dy = b.y - a.y;
+      const segmentLength = Math.hypot(dx, dy);
+      const angle = Math.atan2(dy, dx);
+      const dashLength = 16;
+      const gapLength = 14;
+      const step = dashLength + gapLength;
+
+      for (let d = step / 2; d < segmentLength - step / 2; d += step) {
+        const cx = a.x + Math.cos(angle) * d;
+        const cy = a.y + Math.sin(angle) * d;
+        const rect = this.add.rectangle(cx, cy, dashLength, 4, 0xfde047);
+        rect.setRotation(angle);
+      }
+    }
   }
 
   private goToSelectedWorld(): void {

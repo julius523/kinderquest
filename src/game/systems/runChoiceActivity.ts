@@ -13,10 +13,18 @@ import type { ActivityDefinition } from "../../types/activity";
  * Color City are otherwise identical, so this is the one place that logic
  * lives.
  */
+export type RunChoiceActivityOptions = {
+  /** Fires once, synchronously, the moment a correct answer is tapped —
+   * before the async save/reward lookup resolves. Lets callers (e.g. the
+   * Monster Racer Challenge) layer on their own flourish. */
+  onCorrect?: () => void;
+};
+
 export function runChoiceActivity(
   scene: Phaser.Scene,
   activity: ActivityDefinition,
   buttonColors?: number[],
+  options: RunChoiceActivityOptions = {},
 ): void {
   const { width, height } = scene.scale;
   const choices = activity.choices ?? [];
@@ -66,6 +74,7 @@ export function runChoiceActivity(
 
     if (isCorrect) {
       correctAttempts += 1;
+      options.onCorrect?.();
       void complete();
       return;
     }

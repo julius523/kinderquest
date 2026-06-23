@@ -1,5 +1,8 @@
 import Phaser from "phaser";
 
+const INK = 0x1a1a2e;
+const SHINE = 0xe2e8f0;
+
 function drawStar(
   graphics: Phaser.GameObjects.Graphics,
   cx: number,
@@ -22,37 +25,83 @@ function drawStar(
   graphics.fillPath();
 }
 
+function drawFace(
+  graphics: Phaser.GameObjects.Graphics,
+  leftEyeX: number,
+  rightEyeX: number,
+  eyeY: number,
+  eyeRadius: number,
+  mouthY: number,
+  mouthWidth: number,
+): void {
+  graphics.fillStyle(INK, 1);
+  graphics.fillCircle(leftEyeX, eyeY, eyeRadius);
+  graphics.fillCircle(rightEyeX, eyeY, eyeRadius);
+  graphics.fillStyle(0xffffff, 0.9);
+  graphics.fillCircle(leftEyeX - eyeRadius * 0.3, eyeY - eyeRadius * 0.3, eyeRadius * 0.35);
+  graphics.fillCircle(rightEyeX - eyeRadius * 0.3, eyeY - eyeRadius * 0.3, eyeRadius * 0.35);
+
+  graphics.lineStyle(3, INK, 1);
+  graphics.beginPath();
+  const midX = (leftEyeX + rightEyeX) / 2;
+  graphics.arc(midX, mouthY - 6, mouthWidth / 2, 0.15 * Math.PI, 0.85 * Math.PI, false);
+  graphics.strokePath();
+}
+
 /**
  * All visuals in Kinder Quest are generated from code, not loaded image
  * files, so there is no risk of accidentally shipping copyrighted art.
- * Textures are drawn once in white and tinted per-use at the sprite level.
+ * Textures are drawn once in white (plus fixed-color details like eyes and
+ * accents) and tinted per-use at the sprite level — white areas take the
+ * full tint color, dark "ink" details stay dark so faces read clearly on
+ * any color car or boat.
  */
 export function generateCoreTextures(scene: Phaser.Scene): void {
   if (scene.textures.exists("tex_car")) return;
 
+  // --- Talking race car, with a friendly cartoon face on the windshield ---
   const car = scene.add.graphics();
   car.fillStyle(0xffffff, 1);
-  car.fillRoundedRect(5, 24, 120, 36, 14);
-  car.fillRoundedRect(28, 2, 70, 26, 10);
-  car.fillStyle(0x1a1a2e, 1);
-  car.fillCircle(34, 64, 15);
-  car.fillCircle(100, 64, 15);
+  car.fillRoundedRect(6, 56, 148, 46, 23); // lower body
+  car.fillRoundedRect(40, 14, 90, 50, 24); // cabin/roof bubble
+  car.fillStyle(SHINE, 0.7);
+  car.fillRoundedRect(54, 24, 70, 30, 14); // windshield band
+  drawFace(car, 72, 104, 40, 8, 58, 36);
+  car.fillStyle(INK, 1);
+  car.fillCircle(38, 96, 17);
+  car.fillCircle(124, 96, 17);
+  car.fillStyle(SHINE, 1);
+  car.fillCircle(38, 96, 7);
+  car.fillCircle(124, 96, 7);
   car.fillStyle(0xffd23f, 1);
-  car.fillCircle(34, 64, 6);
-  car.fillCircle(100, 64, 6);
-  car.generateTexture("tex_car", 134, 80);
+  car.fillCircle(38, 96, 2.5);
+  car.fillCircle(124, 96, 2.5);
+  car.generateTexture("tex_car", 160, 112);
   car.destroy();
 
+  // --- Talking boat friend, curved hull via uneven corner radii ---
   const boat = scene.add.graphics();
   boat.fillStyle(0xffffff, 1);
-  boat.fillTriangle(10, 60, 110, 60, 90, 10);
-  boat.fillRect(10, 60, 100, 16);
-  boat.generateTexture("tex_boat", 120, 80);
+  boat.fillRoundedRect(8, 52, 124, 38, { tl: 4, tr: 4, bl: 34, br: 34 });
+  boat.fillStyle(SHINE, 0.6);
+  boat.fillRect(8, 52, 124, 10);
+  boat.fillStyle(INK, 1);
+  boat.fillRect(66, 4, 5, 56);
+  boat.fillStyle(0xffffff, 1);
+  boat.fillTriangle(71, 10, 71, 54, 122, 48);
+  boat.fillStyle(0xffd23f, 1);
+  boat.fillTriangle(66, 4, 66, 16, 88, 8);
+  drawFace(boat, 36, 58, 70, 7, 84, 30);
+  boat.generateTexture("tex_boat", 140, 96);
   boat.destroy();
 
   const wheel = scene.add.graphics();
   wheel.fillStyle(0xffffff, 1);
   wheel.fillCircle(20, 20, 20);
+  wheel.fillStyle(INK, 1);
+  wheel.fillCircle(20, 20, 12);
+  wheel.fillStyle(SHINE, 1);
+  wheel.fillCircle(20, 20, 5);
   wheel.generateTexture("tex_wheel", 40, 40);
   wheel.destroy();
 
@@ -74,6 +123,15 @@ export function generateCoreTextures(scene: Phaser.Scene): void {
   trophy.fillRoundedRect(14, 4, 32, 28, 8);
   trophy.fillRect(24, 30, 12, 12);
   trophy.fillRoundedRect(16, 42, 28, 8, 4);
+  trophy.lineStyle(4, 0xffffff, 1);
+  trophy.beginPath();
+  trophy.arc(10, 12, 8, Math.PI * 0.3, Math.PI * 1.3, true);
+  trophy.strokePath();
+  trophy.beginPath();
+  trophy.arc(50, 12, 8, Math.PI * 1.7, Math.PI * 0.7, true);
+  trophy.strokePath();
+  trophy.fillStyle(0xfff7ed, 0.8);
+  drawStar(trophy, 30, 16, 5, 7, 3);
   trophy.generateTexture("tex_trophy", 60, 50);
   trophy.destroy();
 
@@ -85,4 +143,27 @@ export function generateCoreTextures(scene: Phaser.Scene): void {
   cloud.fillRect(14, 30, 56, 18);
   cloud.generateTexture("tex_cloud", 80, 50);
   cloud.destroy();
+
+  const sun = scene.add.graphics();
+  sun.fillStyle(0xffd23f, 1);
+  sun.fillCircle(30, 30, 18);
+  sun.lineStyle(5, 0xffd23f, 1);
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * Math.PI * 2;
+    sun.beginPath();
+    sun.moveTo(30 + Math.cos(angle) * 24, 30 + Math.sin(angle) * 24);
+    sun.lineTo(30 + Math.cos(angle) * 30, 30 + Math.sin(angle) * 30);
+    sun.strokePath();
+  }
+  sun.generateTexture("tex_sun", 60, 60);
+  sun.destroy();
+
+  const bush = scene.add.graphics();
+  bush.fillStyle(0xffffff, 1);
+  bush.fillCircle(15, 20, 14);
+  bush.fillCircle(30, 14, 16);
+  bush.fillCircle(45, 20, 14);
+  bush.fillRect(8, 20, 44, 10);
+  bush.generateTexture("tex_bush", 60, 32);
+  bush.destroy();
 }

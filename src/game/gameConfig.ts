@@ -10,6 +10,12 @@ import { ColorCityScene } from "./scenes/ColorCityScene";
 import { ListeningLaneScene } from "./scenes/ListeningLaneScene";
 import { DrawingDockScene } from "./scenes/DrawingDockScene";
 import { RewardRaceScene } from "./scenes/RewardRaceScene";
+import { SpeechGarageScene } from "./scenes/SpeechGarageScene";
+import { FriendshipTrackScene } from "./scenes/FriendshipTrackScene";
+import { CalmPitStopScene } from "./scenes/CalmPitStopScene";
+import { MovementMissionScene } from "./scenes/MovementMissionScene";
+import { StoryCoveScene } from "./scenes/StoryCoveScene";
+import { MonsterRacerChallengeScene } from "./scenes/MonsterRacerChallengeScene";
 
 export function createGameConfig(parent: HTMLElement): Phaser.Types.Core.GameConfig {
   return {
@@ -34,6 +40,12 @@ export function createGameConfig(parent: HTMLElement): Phaser.Types.Core.GameCon
       ListeningLaneScene,
       DrawingDockScene,
       RewardRaceScene,
+      SpeechGarageScene,
+      FriendshipTrackScene,
+      CalmPitStopScene,
+      MovementMissionScene,
+      StoryCoveScene,
+      MonsterRacerChallengeScene,
     ],
   };
 }
