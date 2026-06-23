@@ -13,7 +13,8 @@ export type SkillName =
   | "calm_body"
   | "turn_taking"
   | "speech_sounds"
-  | "movement";
+  | "movement"
+  | "sight_words";
 
 export type PromptLevel =
   | "independent"
@@ -40,6 +41,7 @@ export type ActivityType =
   | "letter_find"
   | "letter_match"
   | "letter_sound"
+  | "sight_word_find"
   | "count_objects"
   | "number_find"
   | "quantity_match"

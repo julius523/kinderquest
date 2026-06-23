@@ -1,4 +1,5 @@
 import type { ActivityDefinition } from "../types/activity";
+import { SIGHT_WORDS } from "./flashCardDecks";
 
 const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
@@ -112,6 +113,32 @@ export function createPrewritingActivity(form: (typeof PREWRITING_FORMS)[number]
 
 export function generatePrewritingActivities(): ActivityDefinition[] {
   return PREWRITING_FORMS.map((form) => createPrewritingActivity(form));
+}
+
+function pickWordDistractors(word: string, pool: string[], count: number): string[] {
+  const candidates = pool.filter((candidate) => candidate !== word);
+  const distractors: string[] = [];
+  while (distractors.length < count && candidates.length > 0) {
+    const index = Math.floor(Math.random() * candidates.length);
+    distractors.push(candidates.splice(index, 1)[0]);
+  }
+  return distractors;
+}
+
+export function generateSightWordActivities(sightWords: string[]): ActivityDefinition[] {
+  return sightWords.map((word) => ({
+    id: `sight_word_find_${word}`,
+    type: "sight_word_find",
+    skill: "sight_words",
+    level: "K",
+    theme: "speedway",
+    instruction: `Find the word: ${word}`,
+    spokenInstruction: `Find the word ${word}.`,
+    verbalHint: `Look for the word that says ${word}.`,
+    choices: shuffle([word, ...pickWordDistractors(word, sightWords, 2)]),
+    correctAnswer: word,
+    interests: ["cars"],
+  }));
 }
 
 const SEED_ACTIVITIES: ActivityDefinition[] = [
@@ -381,6 +408,7 @@ export const ACTIVITY_LIBRARY: ActivityDefinition[] = [
   ...generateLetterActivities(),
   ...generateCountingActivities(),
   ...generatePrewritingActivities(),
+  ...generateSightWordActivities(SIGHT_WORDS),
 ];
 
 export function getActivityById(id: string): ActivityDefinition | undefined {

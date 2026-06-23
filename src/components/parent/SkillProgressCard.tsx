@@ -16,6 +16,7 @@ const SKILL_LABELS: Record<string, string> = {
   turn_taking: "Turn Taking",
   speech_sounds: "Speech Sounds",
   movement: "Movement",
+  sight_words: "Sight Words",
 };
 
 export function SkillProgressCard({ summary }: { summary: SkillProgressSummary }) {

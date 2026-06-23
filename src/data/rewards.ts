@@ -98,6 +98,14 @@ export const REWARDS: Reward[] = [
     unlockSkill: "social_skills",
     praiseText: "You made a kind choice. You earned the Friendship Flag!",
   },
+  {
+    id: "sight_word_speedometer",
+    name: "Sight Word Speedometer",
+    category: "track_piece",
+    rarity: "common",
+    unlockSkill: "sight_words",
+    praiseText: "You read the word! You unlocked the Sight Word Speedometer!",
+  },
 ];
 
 export const PRAISE_BANK: Record<string, string[]> = {
@@ -116,6 +124,7 @@ export const PRAISE_BANK: Record<string, string[]> = {
   turn_taking: ["You waited for your turn!", "You shared the race!"],
   speech_sounds: ["You tried the word!", "Nice clear words!"],
   movement: ["You moved your body!", "Great energy, Super Racer!"],
+  sight_words: ["You read the word!", "You're a word racer!", "Reading mission complete!"],
   effort: ["Good trying!", "You tried again!", "Super Racer keeps going!"],
 };
 

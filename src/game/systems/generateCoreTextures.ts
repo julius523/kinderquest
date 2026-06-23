@@ -3,7 +3,7 @@ import Phaser from "phaser";
 export const INK = 0x1a1a2e;
 const SHINE = 0xe2e8f0;
 
-function drawStar(
+export function drawStar(
   graphics: Phaser.GameObjects.Graphics,
   cx: number,
   cy: number,

@@ -16,11 +16,11 @@ type WorldNode = {
 };
 
 const WORLD_NODES: WorldNode[] = [
-  { id: "welcome_garage", label: "Garage", x: 0.06, y: 0.6, unlocked: true },
+  { id: "welcome_garage", label: "Garage", x: 0.05, y: 0.6, unlocked: true },
   {
     id: "letter_lagoon",
     label: "Letter Lagoon",
-    x: 0.2,
+    x: 0.175,
     y: 0.38,
     unlocked: true,
     sceneKey: "LetterLagoonScene",
@@ -29,7 +29,7 @@ const WORLD_NODES: WorldNode[] = [
   {
     id: "number_speedway",
     label: "Number Speedway",
-    x: 0.34,
+    x: 0.3,
     y: 0.6,
     unlocked: true,
     sceneKey: "NumberSpeedwayScene",
@@ -38,7 +38,7 @@ const WORLD_NODES: WorldNode[] = [
   {
     id: "shape_harbor",
     label: "Shape Harbor",
-    x: 0.48,
+    x: 0.425,
     y: 0.38,
     unlocked: true,
     sceneKey: "ShapeHarborScene",
@@ -47,7 +47,7 @@ const WORLD_NODES: WorldNode[] = [
   {
     id: "color_city",
     label: "Color City",
-    x: 0.62,
+    x: 0.55,
     y: 0.6,
     unlocked: true,
     sceneKey: "ColorCityScene",
@@ -56,7 +56,7 @@ const WORLD_NODES: WorldNode[] = [
   {
     id: "listening_lane",
     label: "Listening Lane",
-    x: 0.76,
+    x: 0.675,
     y: 0.38,
     unlocked: true,
     sceneKey: "ListeningLaneScene",
@@ -65,11 +65,20 @@ const WORLD_NODES: WorldNode[] = [
   {
     id: "drawing_dock",
     label: "Drawing Dock",
-    x: 0.9,
+    x: 0.8,
     y: 0.6,
     unlocked: true,
     sceneKey: "DrawingDockScene",
     skill: "prewriting",
+  },
+  {
+    id: "sight_words",
+    label: "Sight Words",
+    x: 0.925,
+    y: 0.38,
+    unlocked: true,
+    sceneKey: "SightWordsScene",
+    skill: "sight_words",
   },
 ];
 
@@ -160,6 +169,15 @@ export class WorldMapScene extends Phaser.Scene {
       "Goodbye",
       () => this.scene.start("GoodbyeScene"),
       { width: 110, height: 48, color: 0x94a3b8, fontSize: "14px" },
+    );
+
+    createBigButton(
+      this,
+      width * 0.9,
+      height * 0.06,
+      "Flash Cards",
+      () => this.scene.start("FlashCardHubScene"),
+      { width: 130, height: 48, color: 0x9333ea, fontSize: "14px" },
     );
 
     const points = WORLD_NODES.map((node) => ({ x: width * node.x, y: height * node.y }));

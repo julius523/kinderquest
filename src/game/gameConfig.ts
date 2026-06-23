@@ -17,6 +17,9 @@ import { MovementMissionScene } from "./scenes/MovementMissionScene";
 import { StoryCoveScene } from "./scenes/StoryCoveScene";
 import { MonsterRacerChallengeScene } from "./scenes/MonsterRacerChallengeScene";
 import { GoodbyeScene } from "./scenes/GoodbyeScene";
+import { FlashCardHubScene } from "./scenes/FlashCardHubScene";
+import { FlashCardScene } from "./scenes/FlashCardScene";
+import { SightWordsScene } from "./scenes/SightWordsScene";
 
 export function createGameConfig(parent: HTMLElement): Phaser.Types.Core.GameConfig {
   return {
@@ -48,6 +51,9 @@ export function createGameConfig(parent: HTMLElement): Phaser.Types.Core.GameCon
       StoryCoveScene,
       MonsterRacerChallengeScene,
       GoodbyeScene,
+      FlashCardHubScene,
+      FlashCardScene,
+      SightWordsScene,
     ],
   };
 }
