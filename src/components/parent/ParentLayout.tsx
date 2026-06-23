@@ -24,7 +24,7 @@ export function ParentLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <nav className="flex gap-2 overflow-x-auto border-b border-slate-200 bg-white p-3">
+      <nav className="flex gap-2 overflow-x-auto border-b border-slate-200 bg-white p-3 print:hidden">
         {TABS.map((tab) => (
           <Link
             key={tab.to}
