@@ -3,6 +3,7 @@ import { useRoutes } from "react-router-dom";
 import { AppProviders } from "./app/providers";
 import { routes } from "./app/routes";
 import { ensureSeeded } from "./db/seed";
+import { useSettingsStore } from "./state/settingsStore";
 
 function AppRoutes() {
   return useRoutes(routes);
@@ -11,6 +12,7 @@ function AppRoutes() {
 function App() {
   useEffect(() => {
     ensureSeeded();
+    useSettingsStore.getState().hydrate();
   }, []);
 
   return (
