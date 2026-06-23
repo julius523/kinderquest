@@ -1,5 +1,6 @@
 import {
   saveActivityResult,
+  getActivityResultsForSession,
   getSkillProgress,
   upsertSkillProgress,
   getInterest,
@@ -7,7 +8,9 @@ import {
   recordReward,
   isRewardUnlocked,
 } from "../db/repositories/activityRepo";
+import { getSession, updateSession } from "../db/repositories/sessionRepo";
 import { getRewardsForSkill, getSpecificPraise } from "../data/rewards";
+import { calculateEngagementScore } from "./engagementEngine";
 import type { ActivityDefinition } from "../types/activity";
 import type { PromptLevel, ResponseMode, SkillName } from "../types/game";
 import type { Reward } from "../types/rewards";
@@ -72,7 +75,30 @@ export async function finishActivity(params: FinishActivityParams): Promise<Fini
   await updateInterestProfile(params.childProfileId, params.activity.interests ?? [], completed, accuracy);
 
   const reward = await chooseReward(params.childProfileId, params.sessionId, params.activity.skill);
+  await updateSessionTotals(params.sessionId, params, completed, reward.id);
+
   return { reward, praiseText: reward.praiseText };
+}
+
+async function updateSessionTotals(
+  sessionId: number,
+  params: FinishActivityParams,
+  completed: boolean,
+  rewardId: string,
+): Promise<void> {
+  const session = await getSession(sessionId);
+  if (!session) return;
+
+  const sessionResults = await getActivityResultsForSession(sessionId);
+  const engagementScore = calculateEngagementScore(sessionResults.slice(-5));
+
+  await updateSession(sessionId, {
+    completedActivities: session.completedActivities + (completed ? 1 : 0),
+    totalAttempts: session.totalAttempts + params.attempts,
+    totalCorrect: session.totalCorrect + params.correctAttempts,
+    engagementScore,
+    rewardsUnlocked: [...session.rewardsUnlocked, rewardId],
+  });
 }
 
 async function updateSkillProgress(

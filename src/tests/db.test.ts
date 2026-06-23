@@ -27,6 +27,17 @@ describe("profileRepo", () => {
     expect(second.name).toBe("Super Racer");
   });
 
+  it("never creates two profiles when called concurrently (e.g. App's seed effect racing a page's own load effect)", async () => {
+    const [first, second] = await Promise.all([
+      getOrCreateDefaultProfile("Super Racer", 5),
+      getOrCreateDefaultProfile("Super Racer", 5),
+    ]);
+    expect(first.id).toBe(second.id);
+
+    const all = await db.childProfiles.toArray();
+    expect(all).toHaveLength(1);
+  });
+
   it("updates a profile and bumps updatedAt", async () => {
     const profile = await createProfile("Test Child", 4);
     const before = profile.updatedAt;

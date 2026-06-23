@@ -1,7 +1,8 @@
+import { Navigate } from "react-router-dom";
+import { ROUTES } from "../app/constants";
+
+/** ParentLayout gates every parent/teacher page inline, so this route just
+ * forwards to the dashboard (which will show the gate itself if locked). */
 export default function ParentGatePage() {
-  return (
-    <main className="flex min-h-screen items-center justify-center bg-white">
-      <p className="text-xl text-slate-500">Parent gate coming soon.</p>
-    </main>
-  );
+  return <Navigate to={ROUTES.parentDashboard} replace />;
 }

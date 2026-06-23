@@ -1,7 +1,7 @@
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import { db } from "../db/db";
 import { createProfile } from "../db/repositories/profileRepo";
-import { startSession } from "../db/repositories/sessionRepo";
+import { startSession, getSession } from "../db/repositories/sessionRepo";
 import { getActivityResultsForChild, getSkillProgress } from "../db/repositories/activityRepo";
 import { finishActivity } from "../services/activityEngine";
 import { getActivityById } from "../data/activityLibrary";
@@ -107,5 +107,26 @@ describe("activityEngine.finishActivity", () => {
     const progress = await getSkillProgress(profile.id!, "letters");
     expect(progress?.successStreak).toBe(0);
     expect(progress?.supportNeeded).toBe(0);
+  });
+
+  it("updates the session's own counters, not just the ActivityResult rows", async () => {
+    const profile = await createProfile("Tester5", 5);
+    const session = await startSession(profile.id!, "laptop");
+
+    const { reward } = await finishActivity({
+      childProfileId: profile.id!,
+      sessionId: session.id!,
+      activity: letterActivity,
+      attempts: 1,
+      correctAttempts: 1,
+      promptLevelUsed: "independent",
+      responseMode: "tap",
+    });
+
+    const updatedSession = await getSession(session.id!);
+    expect(updatedSession?.completedActivities).toBe(1);
+    expect(updatedSession?.totalAttempts).toBe(1);
+    expect(updatedSession?.totalCorrect).toBe(1);
+    expect(updatedSession?.rewardsUnlocked).toContain(reward.id);
   });
 });
