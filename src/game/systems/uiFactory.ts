@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { speak } from "../../services/textToSpeechService";
+import { popIn } from "./feedback";
 
 export type BigButtonOptions = {
   width?: number;
@@ -7,12 +8,14 @@ export type BigButtonOptions = {
   color?: number;
   spokenText?: string;
   fontSize?: string;
+  entranceDelay?: number;
 };
 
 /**
  * A large, read-aloud, touch-friendly button native to the Phaser canvas.
- * Speaks its label on hover/tap, animates on press, and never penalizes the
- * child for tapping — there is no "wrong" state at the button level.
+ * Speaks its label on hover/tap, animates on press, pops in on creation,
+ * and never penalizes the child for tapping — there is no "wrong" state
+ * at the button level.
  */
 export function createBigButton(
   scene: Phaser.Scene,
@@ -51,6 +54,7 @@ export function createBigButton(
     .setOrigin(0.5);
 
   container.add([bg, text]);
+  popIn(scene, container, options.entranceDelay ?? 0);
 
   const announce = () => speak(spokenText);
 

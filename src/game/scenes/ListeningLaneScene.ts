@@ -3,6 +3,7 @@ import { speak } from "../../services/textToSpeechService";
 import { providePrompt } from "../../services/promptEngine";
 import { finishActivity } from "../../services/activityEngine";
 import { createBigButton } from "../systems/uiFactory";
+import { celebrate, popIn, shake } from "../systems/feedback";
 import type { ActivityDefinition } from "../../types/activity";
 
 const OBJECT_TEXTURES: Record<string, string> = {
@@ -48,9 +49,9 @@ export class ListeningLaneScene extends Phaser.Scene {
       const textureKey = OBJECT_TEXTURES[objectId] ?? "tex_car_plain";
       const image = this.add
         .image(spacing * (index + 1), height * 0.5, textureKey)
-        .setScale(1.8)
         .setTint(0x2563eb)
         .setInteractive({ useHandCursor: true });
+      popIn(this, image, index * 100, 1.8);
 
       image.on("pointerdown", () => this.handleTap(objectId, image));
     });
@@ -66,6 +67,7 @@ export class ListeningLaneScene extends Phaser.Scene {
 
     if (objectId === expected) {
       image.setTint(0x16a34a);
+      celebrate(this, image);
       this.sequenceIndex += 1;
       speak("Good listening.");
 
@@ -75,6 +77,7 @@ export class ListeningLaneScene extends Phaser.Scene {
       return;
     }
 
+    shake(this, image);
     this.attempts += 1;
     const prompt = providePrompt(this.activity, this.attempts);
     this.promptLevelUsed = prompt.level;

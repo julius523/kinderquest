@@ -4,6 +4,7 @@ import { providePrompt } from "../../services/promptEngine";
 import { finishActivity } from "../../services/activityEngine";
 import { createBigButton } from "../systems/uiFactory";
 import { scoreTracingPath, type TracePoint } from "../systems/pathScoring";
+import { celebrate } from "../systems/feedback";
 import type { ActivityDefinition } from "../../types/activity";
 
 const PASS_THRESHOLD = 0.6;
@@ -137,6 +138,7 @@ export class DrawingDockScene extends Phaser.Scene {
     });
 
     if (score >= PASS_THRESHOLD) {
+      celebrate(this, this.freehand);
       const childProfileId = this.registry.get("childProfileId") as number;
       const sessionId = this.registry.get("sessionId") as number;
 

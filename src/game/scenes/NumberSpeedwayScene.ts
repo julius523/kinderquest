@@ -3,6 +3,7 @@ import { speak } from "../../services/textToSpeechService";
 import { providePrompt } from "../../services/promptEngine";
 import { finishActivity } from "../../services/activityEngine";
 import { createBigButton } from "../systems/uiFactory";
+import { celebrate, popIn, shake } from "../systems/feedback";
 import type { ActivityDefinition } from "../../types/activity";
 
 const OBJECT_TEXTURES: Record<string, string> = {
@@ -66,14 +67,16 @@ export class NumberSpeedwayScene extends Phaser.Scene {
       const x = startX + col * cellWidth;
       const y = startY + row * rowHeight;
 
-      const image = this.add.image(x, y, textureKey).setScale(1.1).setTint(0xea580c).setInteractive({
+      const image = this.add.image(x, y, textureKey).setTint(0xea580c).setInteractive({
         useHandCursor: true,
       });
+      popIn(this, image, i * 70, 1.1);
 
       image.on("pointerdown", () => {
         if (image.getData("tapped")) return;
         image.setData("tapped", true);
         image.setTint(0x16a34a);
+        celebrate(this, image);
         this.tappedCount += 1;
         speak(String(this.tappedCount));
         counterText.setText(String(this.tappedCount));
@@ -113,8 +116,8 @@ export class NumberSpeedwayScene extends Phaser.Scene {
         spacing * (index + 1),
         height * 0.82,
         String(option),
-        () => this.handleAnswer(option, targetCount, correctButton),
-        { width: 100, height: 90, color: 0xea580c },
+        () => this.handleAnswer(option, targetCount, button, correctButton),
+        { width: 100, height: 90, color: 0xea580c, entranceDelay: index * 90 },
       );
       if (option === targetCount) correctButton = button;
     });
@@ -123,14 +126,18 @@ export class NumberSpeedwayScene extends Phaser.Scene {
   private handleAnswer(
     answer: number,
     targetCount: number,
+    tappedButton: Phaser.GameObjects.Container,
     correctButton: Phaser.GameObjects.Container | undefined,
   ): void {
     this.attempts += 1;
 
     if (answer === targetCount) {
+      celebrate(this, tappedButton);
       void this.complete(1);
       return;
     }
+
+    shake(this, tappedButton);
 
     const prompt = providePrompt(this.activity, this.attempts);
     this.promptLevelUsed = prompt.level;

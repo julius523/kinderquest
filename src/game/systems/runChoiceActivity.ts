@@ -3,6 +3,7 @@ import { speak } from "../../services/textToSpeechService";
 import { providePrompt } from "../../services/promptEngine";
 import { finishActivity } from "../../services/activityEngine";
 import { createBigButton } from "./uiFactory";
+import { celebrate, shake } from "./feedback";
 import type { ActivityDefinition } from "../../types/activity";
 
 const RAPID_TAP_WINDOW_MS = 900;
@@ -60,8 +61,13 @@ export function runChoiceActivity(
       spacing * (index + 1),
       height * 0.5,
       choice,
-      () => handleChoice(choice),
-      { width: Math.min(160, spacing - 16), height: 110, color: buttonColors?.[index] ?? 0xff5a36 },
+      () => handleChoice(choice, button),
+      {
+        width: Math.min(160, spacing - 16),
+        height: 110,
+        color: buttonColors?.[index] ?? 0xff5a36,
+        entranceDelay: index * 90,
+      },
     );
     buttons.push(button);
   });
@@ -73,16 +79,19 @@ export function runChoiceActivity(
     scene.tweens.add({ targets: target, alpha: 0.35, yoyo: true, repeat: 3, duration: 180 });
   }
 
-  function handleChoice(choice: string): void {
+  function handleChoice(choice: string, button: Phaser.GameObjects.Container): void {
     attempts += 1;
     const isCorrect = choice === activity.correctAnswer;
 
     if (isCorrect) {
       correctAttempts += 1;
+      celebrate(scene, button);
       options.onCorrect?.();
       void complete();
       return;
     }
+
+    shake(scene, button);
 
     const now = Date.now();
     if (lastMissAt && now - lastMissAt < RAPID_TAP_WINDOW_MS) {
