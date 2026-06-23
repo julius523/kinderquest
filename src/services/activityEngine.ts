@@ -9,6 +9,7 @@ import {
   isRewardUnlocked,
 } from "../db/repositories/activityRepo";
 import { getSession, updateSession } from "../db/repositories/sessionRepo";
+import { getProfile, updateProfile } from "../db/repositories/profileRepo";
 import { getRewardsForSkill, getSpecificPraise } from "../data/rewards";
 import { calculateEngagementScore } from "./engagementEngine";
 import type { ActivityDefinition } from "../types/activity";
@@ -76,8 +77,39 @@ export async function finishActivity(params: FinishActivityParams): Promise<Fini
 
   const reward = await chooseReward(params.childProfileId, params.sessionId, params.activity.skill);
   await updateSessionTotals(params.sessionId, params, completed, reward.id);
+  await applyRewardToAvatar(params.childProfileId, reward);
 
   return { reward, praiseText: reward.praiseText };
+}
+
+/** Cars/boats/super-suits are visible, not just a line in a reward
+ * table — unlocking one adds it to the avatar and equips it immediately,
+ * so progression actually shows up next time the child sees their
+ * character. */
+async function applyRewardToAvatar(childProfileId: number, reward: Reward): Promise<void> {
+  if (reward.category !== "car" && reward.category !== "boat" && reward.category !== "super_suit") {
+    return;
+  }
+
+  const profile = await getProfile(childProfileId);
+  if (!profile?.id) return;
+
+  const avatar = { ...profile.avatar };
+
+  if (reward.category === "car" && !avatar.unlockedCars.includes(reward.id)) {
+    avatar.unlockedCars = [...avatar.unlockedCars, reward.id];
+    avatar.activeCar = reward.id;
+  }
+  if (reward.category === "boat" && !avatar.unlockedBoats.includes(reward.id)) {
+    avatar.unlockedBoats = [...avatar.unlockedBoats, reward.id];
+    avatar.activeBoat = reward.id;
+  }
+  if (reward.category === "super_suit" && !avatar.unlockedSuits.includes(reward.id)) {
+    avatar.unlockedSuits = [...avatar.unlockedSuits, reward.id];
+    avatar.activeSuit = reward.id;
+  }
+
+  await updateProfile(profile.id, { avatar });
 }
 
 async function updateSessionTotals(

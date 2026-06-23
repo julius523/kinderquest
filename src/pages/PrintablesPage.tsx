@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { ParentLayout } from "../components/parent/ParentLayout";
 import { PrintableView } from "../components/parent/PrintableView";
 import { ExportButtons } from "../components/parent/ExportButtons";
-import { getOrCreateDefaultProfile } from "../db/repositories/profileRepo";
+import { ChildSwitcher } from "../components/parent/ChildSwitcher";
+import { useActiveProfile } from "../hooks/useActiveProfile";
 import { getSessionsForChild } from "../db/repositories/sessionRepo";
 import { getActivityResultsForChild, getAllSkillProgress, getRewardsForChild } from "../db/repositories/activityRepo";
 import { summarizeSkillProgress } from "../services/analyticsEngine";
@@ -61,38 +62,54 @@ type PageData = {
 };
 
 export default function PrintablesPage() {
-  const [data, setData] = useState<PageData | null>(null);
+  const { profile, profiles, selectProfile } = useActiveProfile();
+  const [result, setResult] = useState<{ profileId: number; data: PageData } | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
 
   useEffect(() => {
-    (async () => {
-      const profile = await getOrCreateDefaultProfile("Super Racer", 5);
-      if (!profile.id) return;
+    if (!profile?.id) return;
+    let cancelled = false;
+    const profileId = profile.id;
 
+    (async () => {
       const [sessions, results, skillProgress, rewards] = await Promise.all([
-        getSessionsForChild(profile.id),
-        getActivityResultsForChild(profile.id),
-        getAllSkillProgress(profile.id),
-        getRewardsForChild(profile.id),
+        getSessionsForChild(profileId),
+        getActivityResultsForChild(profileId),
+        getAllSkillProgress(profileId),
+        getRewardsForChild(profileId),
       ]);
 
-      setData({
-        profile,
-        sessions,
-        results,
-        skillProgress,
-        insights: generateInsights(profile.id, results),
-        rewardIds: rewards.map((r) => r.rewardId),
+      if (cancelled) return;
+      setResult({
+        profileId,
+        data: {
+          profile,
+          sessions,
+          results,
+          skillProgress,
+          insights: generateInsights(profileId, results),
+          rewardIds: rewards.map((r) => r.rewardId),
+        },
       });
     })();
-  }, []);
 
+    return () => {
+      cancelled = true;
+    };
+  }, [profile]);
+
+  // Tagged with the profileId it belongs to so switching children never
+  // briefly shows the previous child's printables/exports.
+  const data = result && result.profileId === profile?.id ? result.data : null;
   const activeOption = PRINTABLE_OPTIONS.find((option) => option.id === activeId);
 
   return (
     <ParentLayout>
       <div className="mx-auto max-w-3xl p-4">
-        <h1 className="mb-4 text-2xl font-bold text-slate-800 print:hidden">Printables</h1>
+        <h1 className="mb-2 text-2xl font-bold text-slate-800 print:hidden">Printables</h1>
+        <div className="print:hidden">
+          <ChildSwitcher profiles={profiles} activeProfileId={profile?.id} onSelect={selectProfile} />
+        </div>
 
         {activeOption && data ? (
           <PrintableView doc={activeOption.build(data)} onBack={() => setActiveId(null)} />

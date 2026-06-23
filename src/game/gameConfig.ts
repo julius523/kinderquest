@@ -16,6 +16,7 @@ import { CalmPitStopScene } from "./scenes/CalmPitStopScene";
 import { MovementMissionScene } from "./scenes/MovementMissionScene";
 import { StoryCoveScene } from "./scenes/StoryCoveScene";
 import { MonsterRacerChallengeScene } from "./scenes/MonsterRacerChallengeScene";
+import { GoodbyeScene } from "./scenes/GoodbyeScene";
 
 export function createGameConfig(parent: HTMLElement): Phaser.Types.Core.GameConfig {
   return {
@@ -46,6 +47,7 @@ export function createGameConfig(parent: HTMLElement): Phaser.Types.Core.GameCon
       MovementMissionScene,
       StoryCoveScene,
       MonsterRacerChallengeScene,
+      GoodbyeScene,
     ],
   };
 }

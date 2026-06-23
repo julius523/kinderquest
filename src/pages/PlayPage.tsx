@@ -3,16 +3,26 @@ import { useNavigate } from "react-router-dom";
 import { PhaserGame } from "../game/PhaserGame";
 import { VideoRewardModal } from "../components/child/VideoRewardModal";
 import { useSettingsStore } from "../state/settingsStore";
+import { useActiveProfile } from "../hooks/useActiveProfile";
 import { ROUTES } from "../app/constants";
 
 export default function PlayPage() {
   const navigate = useNavigate();
   const youtubeEnabled = useSettingsStore((state) => state.settings.youtubeEnabled);
+  const { profile, loading } = useActiveProfile();
   const [showVideoReward, setShowVideoReward] = useState(false);
+
+  if (loading || !profile?.id) {
+    return (
+      <main className="flex h-screen w-screen items-center justify-center bg-white">
+        <p className="text-xl text-slate-500">Loading Super Racer&apos;s garage…</p>
+      </main>
+    );
+  }
 
   return (
     <div className="relative h-screen w-screen">
-      <PhaserGame onExitToHome={() => navigate(ROUTES.childHome)} />
+      <PhaserGame onExitToHome={() => navigate(ROUTES.childHome)} activeProfileId={profile.id} />
 
       {youtubeEnabled && !showVideoReward && (
         <button

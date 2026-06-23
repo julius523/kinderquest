@@ -166,4 +166,19 @@ export function generateCoreTextures(scene: Phaser.Scene): void {
   bush.fillRect(8, 20, 44, 10);
   bush.generateTexture("tex_bush", 60, 32);
   bush.destroy();
+
+  // A visible reward: drawn behind the car once a super-suit reward is
+  // unlocked, so progression is something the child can actually see.
+  const cape = scene.add.graphics();
+  cape.fillStyle(0xffffff, 1);
+  cape.beginPath();
+  cape.moveTo(20, 0);
+  cape.lineTo(60, 0);
+  cape.lineTo(70, 70);
+  cape.lineTo(40, 90);
+  cape.lineTo(10, 70);
+  cape.closePath();
+  cape.fillPath();
+  cape.generateTexture("tex_cape", 80, 90);
+  cape.destroy();
 }

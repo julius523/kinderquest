@@ -11,7 +11,7 @@ test("the child home page still works after going offline", async ({ page, conte
   await page.reload();
 
   await expect(page.getByRole("heading", { name: "Kinder Quest" })).toBeVisible();
-  await expect(page.getByText("Welcome to Kinder Quest. You are Super Racer!")).toBeVisible();
+  await expect(page.getByText(/Welcome to Kinder Quest, .+!/)).toBeVisible();
 });
 
 test("the /play route (including the Phaser game) still works after going offline", async ({

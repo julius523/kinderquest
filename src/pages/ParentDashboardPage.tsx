@@ -5,7 +5,9 @@ import { SkillProgressCard } from "../components/parent/SkillProgressCard";
 import { InsightCard } from "../components/parent/InsightCard";
 import { SessionTimeline } from "../components/parent/SessionTimeline";
 import { InterestRadar } from "../components/parent/InterestRadar";
-import { getOrCreateDefaultProfile } from "../db/repositories/profileRepo";
+import { EngagementTrendChart } from "../components/parent/EngagementTrendChart";
+import { ChildSwitcher } from "../components/parent/ChildSwitcher";
+import { useActiveProfile } from "../hooks/useActiveProfile";
 import { getSessionsForChild } from "../db/repositories/sessionRepo";
 import {
   getActivityResultsForChild,
@@ -40,28 +42,31 @@ type DashboardData = {
   communicationEvents: CommunicationEvent[];
 };
 
-function useDashboardData() {
-  const [data, setData] = useState<DashboardData | null>(null);
+function useDashboardData(profile: ChildProfile | null) {
+  const [result, setResult] = useState<{ profileId: number; data: DashboardData } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!profile?.id) return;
     let cancelled = false;
+    const profileId = profile.id;
 
     (async () => {
       try {
-        const profile = await getOrCreateDefaultProfile("Super Racer", 5);
-        if (!profile.id || cancelled) return;
-
         const [sessions, results, skillProgress, interests, communicationEvents] = await Promise.all([
-          getSessionsForChild(profile.id),
-          getActivityResultsForChild(profile.id),
-          getAllSkillProgress(profile.id),
-          getAllInterests(profile.id),
-          getCommunicationEventsForChild(profile.id),
+          getSessionsForChild(profileId),
+          getActivityResultsForChild(profileId),
+          getAllSkillProgress(profileId),
+          getAllInterests(profileId),
+          getCommunicationEventsForChild(profileId),
         ]);
 
         if (cancelled) return;
-        setData({ profile, sessions, results, skillProgress, interests, communicationEvents });
+        setResult({
+          profileId,
+          data: { profile, sessions, results, skillProgress, interests, communicationEvents },
+        });
+        setError(null);
       } catch (err) {
         if (!cancelled) {
           console.error("Failed to load parent dashboard data", err);
@@ -73,19 +78,27 @@ function useDashboardData() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [profile]);
+
+  // Tagging the cached result with the profileId it belongs to (rather
+  // than resetting state synchronously on profile change) avoids ever
+  // showing one child's data under another's name while the new fetch is
+  // in flight.
+  const data = result && result.profileId === profile?.id ? result.data : null;
 
   return { data, error };
 }
 
 export default function ParentDashboardPage() {
   const [tab, setTab] = useState<DashboardTab>("today");
-  const { data, error } = useDashboardData();
+  const { profile, profiles, selectProfile } = useActiveProfile();
+  const { data, error } = useDashboardData(profile);
 
   return (
     <ParentLayout>
       <div className="mx-auto max-w-3xl p-4">
-        <h1 className="mb-4 text-2xl font-bold text-slate-800">Parent Dashboard</h1>
+        <h1 className="mb-2 text-2xl font-bold text-slate-800">Parent Dashboard</h1>
+        <ChildSwitcher profiles={profiles} activeProfileId={profile?.id} onSelect={selectProfile} />
 
         <div className="mb-4 flex gap-2 overflow-x-auto">
           {TABS.map((t) => (
@@ -147,6 +160,12 @@ function DashboardTabContent({ tab, data }: { tab: DashboardTab; data: Dashboard
           <DashboardCard label="Calm Breaks Used" value={String(todaySummary.calmBreaksUsed)} />
           <DashboardCard label="Movement Breaks Used" value={String(todaySummary.movementBreaksUsed)} />
         </div>
+
+        <h2 className="mt-2 text-lg font-bold text-slate-700">Engagement Trend</h2>
+        <div className="rounded-2xl bg-white p-4 shadow">
+          <EngagementTrendChart sessions={data.sessions} />
+        </div>
+
         <h2 className="mt-2 text-lg font-bold text-slate-700">Recent Sessions</h2>
         <SessionTimeline sessions={data.sessions} />
       </div>

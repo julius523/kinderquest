@@ -1,12 +1,13 @@
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import { db } from "../db/db";
-import { createProfile } from "../db/repositories/profileRepo";
+import { createProfile, getProfile } from "../db/repositories/profileRepo";
 import { startSession, getSession } from "../db/repositories/sessionRepo";
 import { getActivityResultsForChild, getSkillProgress } from "../db/repositories/activityRepo";
 import { finishActivity } from "../services/activityEngine";
-import { getActivityById } from "../data/activityLibrary";
+import { getActivityById, getActivitiesBySkill } from "../data/activityLibrary";
 
 const letterActivity = getActivityById("letter_find_x_race_sign")!;
+const communicationActivity = getActivitiesBySkill("communication")[0];
 
 beforeAll(async () => {
   await db.open();
@@ -128,5 +129,48 @@ describe("activityEngine.finishActivity", () => {
     expect(updatedSession?.totalAttempts).toBe(1);
     expect(updatedSession?.totalCorrect).toBe(1);
     expect(updatedSession?.rewardsUnlocked).toContain(reward.id);
+  });
+
+  it("unlocking a super-suit reward visibly equips it on the avatar, not just the rewards table", async () => {
+    const profile = await createProfile("Tester6", 5);
+    const session = await startSession(profile.id!, "laptop");
+
+    const { reward } = await finishActivity({
+      childProfileId: profile.id!,
+      sessionId: session.id!,
+      activity: communicationActivity,
+      attempts: 1,
+      correctAttempts: 1,
+      promptLevelUsed: "independent",
+      responseMode: "tap",
+    });
+
+    expect(reward.category).toBe("super_suit");
+
+    const updatedProfile = await getProfile(profile.id!);
+    expect(updatedProfile?.avatar.unlockedSuits).toContain(reward.id);
+    expect(updatedProfile?.avatar.activeSuit).toBe(reward.id);
+  });
+
+  it("does not touch the avatar for non-wearable rewards (e.g. trophies)", async () => {
+    const profile = await createProfile("Tester7", 5);
+    const avatarBefore = profile.avatar;
+    const session = await startSession(profile.id!, "laptop");
+    const safeBehaviorActivity = getActivityById("safe_body_gentle_hands")!;
+
+    const { reward } = await finishActivity({
+      childProfileId: profile.id!,
+      sessionId: session.id!,
+      activity: safeBehaviorActivity,
+      attempts: 1,
+      correctAttempts: 1,
+      promptLevelUsed: "independent",
+      responseMode: "tap",
+    });
+
+    expect(reward.category).toBe("trophy");
+
+    const updatedProfile = await getProfile(profile.id!);
+    expect(updatedProfile?.avatar).toEqual(avatarBefore);
   });
 });

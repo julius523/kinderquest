@@ -153,6 +153,15 @@ export class WorldMapScene extends Phaser.Scene {
 
     speak("Here is the road. Pick a mission!");
 
+    createBigButton(
+      this,
+      width * 0.1,
+      height * 0.06,
+      "Goodbye",
+      () => this.scene.start("GoodbyeScene"),
+      { width: 110, height: 48, color: 0x94a3b8, fontSize: "14px" },
+    );
+
     const points = WORLD_NODES.map((node) => ({ x: width * node.x, y: height * node.y }));
     this.drawRoad(points);
 

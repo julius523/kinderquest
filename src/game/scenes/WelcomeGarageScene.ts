@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 import { speak } from "../../services/textToSpeechService";
 import { createBigButton } from "../systems/uiFactory";
-import { getDefaultProfile } from "../../db/repositories/profileRepo";
+import { getProfile } from "../../db/repositories/profileRepo";
 import { startSession } from "../../db/repositories/sessionRepo";
 import { detectDeviceType } from "../../utils/device";
 import { prefersReducedMotion } from "../systems/motionPreference";
@@ -59,7 +59,7 @@ export class WelcomeGarageScene extends Phaser.Scene {
       });
     }
 
-    this.add
+    const welcomeText = this.add
       .text(width / 2, height * 0.7, "You are Super Racer!", {
         fontFamily: "system-ui, sans-serif",
         fontSize: "22px",
@@ -70,7 +70,7 @@ export class WelcomeGarageScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
-    speak("Welcome to Kinder Quest. You are Super Racer!");
+    void this.speakPersonalizedWelcome(welcomeText, superRacer);
 
     createBigButton(this, width / 2, height * 0.83, "Start Mission", () => {
       void this.startMission();
@@ -86,6 +86,27 @@ export class WelcomeGarageScene extends Phaser.Scene {
       },
       { color: 0x3bb2ff, width: 220, height: 60, fontSize: "20px" },
     );
+  }
+
+  private async speakPersonalizedWelcome(
+    welcomeText: Phaser.GameObjects.Text,
+    superRacer: Phaser.GameObjects.Image,
+  ): Promise<void> {
+    const activeProfileId = this.registry.get("activeProfileId") as number | undefined;
+    const profile = activeProfileId ? await getProfile(activeProfileId) : undefined;
+    const name = profile?.name ?? "Super Racer";
+
+    welcomeText.setText(`Welcome, ${name}! You are Super Racer!`);
+    speak(`Welcome to Kinder Quest, ${name}! You are Super Racer!`);
+
+    if (profile && profile.avatar.unlockedSuits.length > 0) {
+      const cape = this.add
+        .image(superRacer.x, superRacer.y - 6, "tex_cape")
+        .setTint(0x2563eb)
+        .setScale(superRacer.scale * 0.9)
+        .setDepth(superRacer.depth - 1);
+      superRacer.setDepth(cape.depth + 1);
+    }
   }
 
   private drawScenery(width: number, height: number): void {
@@ -108,11 +129,11 @@ export class WelcomeGarageScene extends Phaser.Scene {
   }
 
   private async startMission(mode: "solo" | "two_player" = "solo"): Promise<void> {
-    const profile = await getDefaultProfile();
-    if (!profile?.id) return;
+    const activeProfileId = this.registry.get("activeProfileId") as number | undefined;
+    if (!activeProfileId) return;
 
-    const session = await startSession(profile.id, detectDeviceType());
-    this.registry.set("childProfileId", profile.id);
+    const session = await startSession(activeProfileId, detectDeviceType());
+    this.registry.set("childProfileId", activeProfileId);
     this.registry.set("sessionId", session.id);
     this.registry.set("sessionMode", mode);
 

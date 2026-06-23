@@ -1,10 +1,36 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../app/constants";
 import { ReadAloudText } from "../components/audio/ReadAloudText";
 import { SpeakButton } from "../components/audio/SpeakButton";
+import { ProfilePicker } from "../components/child/ProfilePicker";
+import { useActiveProfile } from "../hooks/useActiveProfile";
 
 export default function ChildHomePage() {
   const navigate = useNavigate();
+  const { profile, profiles, loading, selectProfile } = useActiveProfile();
+  const [pickedThisVisit, setPickedThisVisit] = useState(false);
+
+  const needsPicker = !loading && profiles.length > 1 && !pickedThisVisit;
+
+  if (loading) {
+    return <main className="min-h-screen bg-white" />;
+  }
+
+  if (needsPicker) {
+    return (
+      <main className="flex min-h-screen flex-col items-center justify-center gap-8 bg-white px-6 text-center">
+        <h1 className="text-4xl font-extrabold text-orange-500 sm:text-5xl">Kinder Quest</h1>
+        <ProfilePicker
+          profiles={profiles}
+          onSelect={(id) => {
+            selectProfile(id);
+            setPickedThisVisit(true);
+          }}
+        />
+      </main>
+    );
+  }
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-8 bg-white px-6 text-center">
@@ -12,7 +38,7 @@ export default function ChildHomePage() {
       <ReadAloudText
         as="p"
         className="text-xl text-slate-600"
-        text="Welcome to Kinder Quest. You are Super Racer!"
+        text={`Welcome to Kinder Quest, ${profile?.name ?? "Super Racer"}!`}
         showRepeatButton={false}
       />
       <SpeakButton
@@ -29,6 +55,15 @@ export default function ChildHomePage() {
       >
         Parent &amp; Teacher
       </SpeakButton>
+      {profiles.length > 1 && (
+        <SpeakButton
+          speakText="Switch Player"
+          onClick={() => setPickedThisVisit(false)}
+          className="text-xs text-slate-300 underline"
+        >
+          Switch Player
+        </SpeakButton>
+      )}
     </main>
   );
 }

@@ -10,7 +10,9 @@ test("child home page loads, reads the welcome message, and navigates to play", 
   await page.goto("/");
 
   await expect(page.getByRole("heading", { name: "Kinder Quest" })).toBeVisible();
-  await expect(page.getByText("Welcome to Kinder Quest. You are Super Racer!")).toBeVisible();
+  // The welcome message is personalized to the active child's name —
+  // the default profile is literally named "Super Racer".
+  await expect(page.getByText(/Welcome to Kinder Quest, .+!/)).toBeVisible();
 
   const playButton = page.getByRole("button", { name: "Play" });
   await expect(playButton).toBeVisible();
