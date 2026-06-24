@@ -42,6 +42,7 @@ export function BigButton({
     <motion.button
       type="button"
       disabled={disabled}
+      onMouseEnter={announce}
       onFocus={announce}
       onClick={() => {
         announce();

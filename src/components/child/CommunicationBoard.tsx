@@ -28,6 +28,8 @@ export function CommunicationBoard({
             <button
               key={phrase.id}
               type="button"
+              onMouseEnter={() => speak(phrase.text)}
+              onFocus={() => speak(phrase.text)}
               onClick={() => {
                 speak(phrase.text);
                 onSelect(phrase);

@@ -12,6 +12,8 @@ export function ParentHelpButton({ onRequestHelp }: ParentHelpButtonProps) {
     <button
       type="button"
       aria-label="Grown-up can help"
+      onMouseEnter={() => speak("Grown-up can help.")}
+      onFocus={() => speak("Grown-up can help.")}
       onClick={() => {
         speak("Grown-up can help.");
         onRequestHelp();

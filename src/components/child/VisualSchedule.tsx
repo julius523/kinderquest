@@ -31,6 +31,8 @@ export function VisualSchedule({
             <button
               key={item.id}
               type="button"
+              onMouseEnter={() => speak(item.label)}
+              onFocus={() => speak(item.label)}
               onClick={() => speak(item.label)}
               aria-current={isCurrent}
               className={`flex w-20 flex-col items-center gap-1 rounded-xl p-2 text-xs font-semibold ${
@@ -50,6 +52,8 @@ export function VisualSchedule({
       {onWhatsNext && (
         <button
           type="button"
+          onMouseEnter={() => speak("What's next?")}
+          onFocus={() => speak("What's next?")}
           onClick={() => {
             speak("What's next?");
             onWhatsNext();

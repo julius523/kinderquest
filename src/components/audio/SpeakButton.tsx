@@ -6,12 +6,17 @@ type SpeakButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   children: ReactNode;
 };
 
-/** A button that reads its own label aloud on focus/tap before firing onClick,
- * per the rule that every button must be readable. */
-export function SpeakButton({ speakText, children, onClick, onFocus, ...rest }: SpeakButtonProps) {
+/** A button that reads its own label aloud on mouse hover, keyboard focus,
+ * or tap before firing onClick — every visible word must be readable, and
+ * for a mouse/trackpad user that means hovering, not just clicking. */
+export function SpeakButton({ speakText, children, onClick, onFocus, onMouseEnter, ...rest }: SpeakButtonProps) {
   return (
     <button
       {...rest}
+      onMouseEnter={(event) => {
+        speak(speakText);
+        onMouseEnter?.(event);
+      }}
       onFocus={(event) => {
         speak(speakText);
         onFocus?.(event);

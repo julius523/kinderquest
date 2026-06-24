@@ -21,6 +21,8 @@ export function CalmChoiceBoard({ onComplete }: CalmChoiceBoardProps) {
         <div className="flex gap-3">
           <button
             type="button"
+            onMouseEnter={() => speak("I'm ready")}
+            onFocus={() => speak("I'm ready")}
             onClick={() => {
               speak("I'm ready");
               onComplete("ready", chosen.id);
@@ -31,6 +33,8 @@ export function CalmChoiceBoard({ onComplete }: CalmChoiceBoardProps) {
           </button>
           <button
             type="button"
+            onMouseEnter={() => speak("More break")}
+            onFocus={() => speak("More break")}
             onClick={() => {
               speak("More break");
               onComplete("more_break", chosen.id);
@@ -55,6 +59,8 @@ export function CalmChoiceBoard({ onComplete }: CalmChoiceBoardProps) {
           <button
             key={strategy.id}
             type="button"
+            onMouseEnter={() => speak(strategy.spokenInstruction)}
+            onFocus={() => speak(strategy.spokenInstruction)}
             onClick={() => {
               speak(strategy.spokenInstruction);
               setChosen(strategy);

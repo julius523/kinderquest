@@ -55,6 +55,8 @@ export function VideoRewardModal({ skill, onClose }: VideoRewardModalProps) {
               <button
                 key={video.videoId}
                 type="button"
+                onMouseEnter={() => speak(video.title)}
+                onFocus={() => speak(video.title)}
                 onClick={() => {
                   speak(video.title);
                   setSelected(video);

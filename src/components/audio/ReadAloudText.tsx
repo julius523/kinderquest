@@ -29,6 +29,7 @@ export function ReadAloudText({
         <button
           type="button"
           aria-label="Repeat instruction"
+          onMouseEnter={() => speak(spokenText ?? text)}
           onClick={() => speak(spokenText ?? text)}
           className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-orange-100 text-orange-600 active:scale-90"
         >

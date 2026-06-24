@@ -20,6 +20,8 @@ export function ProfilePicker({ profiles, onSelect }: ProfilePickerProps) {
           <button
             key={profile.id}
             type="button"
+            onMouseEnter={() => speak(profile.name)}
+            onFocus={() => speak(profile.name)}
             onClick={() => {
               speak(profile.name);
               onSelect(profile.id!);
