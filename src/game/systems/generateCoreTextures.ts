@@ -75,17 +75,18 @@ export function generateCoreTextures(scene: Phaser.Scene): void {
   boat.generateTexture("tex_boat", 140, 96);
   boat.destroy();
 
-  // A plain, faceless, tintable silhouette — used where color conveys
-  // *state* (tapped/correct) rather than character identity, since the
-  // real Kenney car sprites are pre-colored and don't tint cleanly.
+  // A plain, faceless, tintable side-view silhouette — used where color
+  // conveys *state* (tapped/correct) rather than character identity, so
+  // it needs to be a single tintable white shape rather than the
+  // pre-colored hero car textures.
   const carPlain = scene.add.graphics();
   carPlain.fillStyle(0xffffff, 1);
-  carPlain.fillRoundedRect(6, 56, 148, 46, 23);
-  carPlain.fillRoundedRect(40, 14, 90, 50, 24);
+  carPlain.fillRoundedRect(8, 50, 144, 26, 13);
+  carPlain.fillRoundedRect(34, 18, 92, 38, 18);
   carPlain.fillStyle(INK, 1);
-  carPlain.fillCircle(38, 96, 17);
-  carPlain.fillCircle(124, 96, 17);
-  carPlain.generateTexture("tex_car_plain", 160, 112);
+  carPlain.fillCircle(42, 80, 16);
+  carPlain.fillCircle(120, 80, 16);
+  carPlain.generateTexture("tex_car_plain", 160, 100);
   carPlain.destroy();
 
   const wheel = scene.add.graphics();

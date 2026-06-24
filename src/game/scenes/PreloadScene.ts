@@ -1,18 +1,15 @@
 import Phaser from "phaser";
-import { preloadCarSprites, composeCarTextures } from "../systems/carTextures";
+import { composeCarTextures } from "../systems/carTextures";
 
 /**
- * Loads licensed external sprite assets (currently just the Kenney car
- * sprites — see src/assets/README.md) and composes them with drawn faces
- * before any scene that needs them starts.
+ * All current assets are generated in code (BootScene + here) — no
+ * external files to load. This scene exists as the place future external
+ * asset loading would happen, keeping the Boot/Preload separation the
+ * rest of the codebase expects.
  */
 export class PreloadScene extends Phaser.Scene {
   constructor() {
     super("PreloadScene");
-  }
-
-  preload(): void {
-    preloadCarSprites(this);
   }
 
   create(): void {

@@ -5,7 +5,11 @@ import { pickRandomActivity } from "../../data/activityLibrary";
 import { prefersReducedMotion } from "../systems/motionPreference";
 import type { SkillName } from "../../types/game";
 
-const REVIEW_SKILLS: SkillName[] = ["letters", "counting", "shapes", "colors"];
+// Only skills whose activities are choice-based (have a `choices` array)
+// belong here — counting activities use NumberSpeedwayScene's dedicated
+// count-the-objects UI instead and aren't compatible with this scene's
+// runChoiceActivity rendering.
+const REVIEW_SKILLS: SkillName[] = ["letters", "shapes", "colors", "sight_words"];
 
 /** Monster Racer mixed up the track — a silly review challenge pulled from
  * a skill the child has already practiced. Monster Racer is always goofy,
@@ -22,14 +26,14 @@ export class MonsterRacerChallengeScene extends Phaser.Scene {
     const skill = REVIEW_SKILLS[Math.floor(Math.random() * REVIEW_SKILLS.length)];
     const activity = pickRandomActivity(skill);
 
-    if (!activity) {
+    if (!activity || !activity.choices || activity.choices.length === 0) {
       speak("Monster Racer will be back soon!");
       return;
     }
 
     speak("Monster Racer mixed up the track. Can you help?");
 
-    const monster = this.add.image(width * 0.85, height * 0.85, "tex_car_black").setScale(2.1);
+    const monster = this.add.image(width * 0.78, height * 0.85, "tex_car_black").setScale(1.8);
     if (!prefersReducedMotion()) {
       this.tweens.add({ targets: monster, angle: { from: -6, to: 6 }, yoyo: true, repeat: -1, duration: 400 });
     }
