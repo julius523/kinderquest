@@ -15,6 +15,31 @@ const CANVAS_HEIGHT = 100;
 const INK = "#1a1a2e";
 const GLASS = "#bfe3f8";
 
+/**
+ * Manual rounded-rect path. `ctx.roundRect()` only landed in Safari 16
+ * (2022) and isn't on every device this app runs on — drawing the path
+ * by hand with arcs works on every Canvas 2D implementation that has
+ * ever existed, so a car can never silently fail to render here.
+ */
+function roundedRectPath(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number): void {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.arc(x + w - r, y + r, r, -Math.PI / 2, 0);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.arc(x + w - r, y + h - r, r, 0, Math.PI / 2);
+  ctx.lineTo(x + r, y + h);
+  ctx.arc(x + r, y + h - r, r, Math.PI / 2, Math.PI);
+  ctx.lineTo(x, y + r);
+  ctx.arc(x + r, y + r, r, Math.PI, Math.PI * 1.5);
+  ctx.closePath();
+}
+
+function fillRoundedRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number): void {
+  roundedRectPath(ctx, x, y, w, h, r);
+  ctx.fill();
+}
+
 function drawWheel(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number): void {
   ctx.fillStyle = INK;
   ctx.beginPath();
@@ -43,23 +68,15 @@ function drawWheel(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: num
 function drawCarOnCanvas(ctx: CanvasRenderingContext2D, bodyColor: string): void {
   ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-  // Chassis (lower body).
+  // Chassis (lower body) + cabin (roof + pillars), overlapping so they
+  // read as one continuous body.
   ctx.fillStyle = bodyColor;
-  ctx.beginPath();
-  ctx.roundRect(8, 50, 144, 26, 13);
-  ctx.fill();
-
-  // Cabin (roof + pillars), overlapping the chassis top so they read as
-  // one continuous body.
-  ctx.beginPath();
-  ctx.roundRect(34, 18, 92, 38, 18);
-  ctx.fill();
+  fillRoundedRect(ctx, 8, 50, 144, 26, 13);
+  fillRoundedRect(ctx, 34, 18, 92, 38, 18);
 
   // Window band (fixed glass color regardless of body color).
   ctx.fillStyle = GLASS;
-  ctx.beginPath();
-  ctx.roundRect(44, 26, 72, 22, 10);
-  ctx.fill();
+  fillRoundedRect(ctx, 44, 26, 72, 22, 10);
 
   // B-pillar splitting windshield (front, right) from rear window (left).
   ctx.fillStyle = INK;
@@ -110,6 +127,24 @@ function drawCarOnCanvas(ctx: CanvasRenderingContext2D, bodyColor: string): void
   ctx.stroke();
 }
 
+/** Bare-minimum car using only fillRect/arc — the Canvas 2D primitives
+ * every browser has supported since canvas existed. Used only if the
+ * detailed drawing above throws on some device, so a car texture is
+ * never blank or solid black. */
+function drawFallbackCarOnCanvas(ctx: CanvasRenderingContext2D, bodyColor: string): void {
+  ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+  ctx.fillStyle = bodyColor;
+  ctx.fillRect(8, 50, 144, 26);
+  ctx.fillRect(34, 18, 92, 38);
+  ctx.fillStyle = INK;
+  ctx.beginPath();
+  ctx.arc(42, 80, 16, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(120, 80, 16, 0, Math.PI * 2);
+  ctx.fill();
+}
+
 export function composeCarTextures(scene: Phaser.Scene): void {
   if (scene.textures.exists("tex_car_red")) return;
 
@@ -120,7 +155,11 @@ export function composeCarTextures(scene: Phaser.Scene): void {
     const ctx = canvas.getContext("2d");
     if (!ctx) continue;
 
-    drawCarOnCanvas(ctx, BODY_HEX[color]);
+    try {
+      drawCarOnCanvas(ctx, BODY_HEX[color]);
+    } catch {
+      drawFallbackCarOnCanvas(ctx, BODY_HEX[color]);
+    }
     scene.textures.addCanvas(`tex_car_${color}`, canvas);
   }
 }

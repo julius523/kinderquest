@@ -1,6 +1,6 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { fuzzyMatch, browserSupportsSpeechRecognition, listenForPhrase } from "../services/speechRecognitionService";
-import { speak, stopSpeaking } from "../services/textToSpeechService";
+import { speak, stopSpeaking, unlockSpeechSynthesis } from "../services/textToSpeechService";
 import { useSettingsStore } from "../state/settingsStore";
 
 describe("fuzzyMatch", () => {
@@ -48,5 +48,34 @@ describe("textToSpeechService", () => {
     const onEnd = vi.fn();
     speak("hello", { onEnd });
     expect(onEnd).toHaveBeenCalled();
+  });
+});
+
+describe("unlockSpeechSynthesis", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("speaks one silent warmup utterance the first time it's called from a real gesture, and is a no-op after that", () => {
+    const speakSpy = vi.fn();
+    vi.stubGlobal("speechSynthesis", { speak: speakSpy, cancel: vi.fn() });
+    vi.stubGlobal(
+      "SpeechSynthesisUtterance",
+      class {
+        text: string;
+        volume = 1;
+        constructor(text: string) {
+          this.text = text;
+        }
+      },
+    );
+
+    unlockSpeechSynthesis();
+    unlockSpeechSynthesis();
+    unlockSpeechSynthesis();
+
+    expect(speakSpy).toHaveBeenCalledTimes(1);
+    const [utterance] = speakSpy.mock.calls[0];
+    expect(utterance.volume).toBe(0);
   });
 });

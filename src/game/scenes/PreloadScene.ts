@@ -13,7 +13,12 @@ export class PreloadScene extends Phaser.Scene {
   }
 
   create(): void {
-    composeCarTextures(this);
+    try {
+      composeCarTextures(this);
+    } catch {
+      // Never let a texture-generation failure strand the game on a
+      // blank preload screen — worlds that don't use cars still work.
+    }
     this.scene.start("WelcomeGarageScene");
   }
 }
