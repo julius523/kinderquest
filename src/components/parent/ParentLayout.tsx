@@ -6,6 +6,7 @@ import { ROUTES } from "../../app/constants";
 
 const TABS = [
   { to: ROUTES.parentDashboard, label: "Dashboard" },
+  { to: ROUTES.iepGuide, label: "Working With Him" },
   { to: ROUTES.parentSettings, label: "Settings" },
   { to: ROUTES.parentYouTube, label: "YouTube" },
   { to: ROUTES.printables, label: "Printables" },

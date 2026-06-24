@@ -10,6 +10,7 @@ export const ROUTES = {
   parentSession: "/parent/session/:sessionId",
   teacherDashboard: "/teacher",
   printables: "/printables",
+  iepGuide: "/parent/iep-guide",
 } as const;
 
 export function parentSessionPath(sessionId: number | string): string {

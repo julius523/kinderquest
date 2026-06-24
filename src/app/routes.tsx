@@ -9,6 +9,7 @@ import ParentYouTubePage from "../pages/ParentYouTubePage";
 import ParentSessionPage from "../pages/ParentSessionPage";
 import TeacherDashboardPage from "../pages/TeacherDashboardPage";
 import PrintablesPage from "../pages/PrintablesPage";
+import IEPGuidePage from "../pages/IEPGuidePage";
 
 export const routes: RouteObject[] = [
   { path: ROUTES.childHome, element: <ChildHomePage /> },
@@ -20,4 +21,5 @@ export const routes: RouteObject[] = [
   { path: ROUTES.parentSession, element: <ParentSessionPage /> },
   { path: ROUTES.teacherDashboard, element: <TeacherDashboardPage /> },
   { path: ROUTES.printables, element: <PrintablesPage /> },
+  { path: ROUTES.iepGuide, element: <IEPGuidePage /> },
 ];
